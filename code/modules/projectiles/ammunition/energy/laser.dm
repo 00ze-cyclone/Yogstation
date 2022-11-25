@@ -15,7 +15,6 @@
 /obj/item/ammo_casing/energy/lasergun/old
 	projectile_type = /obj/item/projectile/beam/laser
 	e_cost = 200
-	select_name = "kill"
 
 /obj/item/ammo_casing/energy/laser/practice
 	projectile_type = /obj/item/projectile/beam/practice
@@ -36,7 +35,6 @@
 
 /obj/item/ammo_casing/energy/laser/cyborg
 	projectile_type = /obj/item/projectile/beam/laser
-	select_name = "kill"
 	e_cost = 125
 
 /obj/item/ammo_casing/energy/laser/heavy
@@ -68,6 +66,7 @@
 
 /obj/item/ammo_casing/energy/xray
 	projectile_type = /obj/item/projectile/beam/xray
+	select_name = "irradiate"
 	e_cost = 100
 	fire_sound = 'sound/weapons/laser3.ogg'
 
@@ -75,6 +74,11 @@
 	e_cost = 70 //14 shots
 
 /obj/item/ammo_casing/energy/mindflayer
-	projectile_type = /obj/item/projectile/beam/mindflayer
+	projectile_type = /obj/item/projectile/beam/anoxia/mindflayer
 	select_name = "MINDFUCK"
+	fire_sound = 'sound/weapons/laser.ogg'
+
+/obj/item/ammo_casing/energy/anoxia
+	projectile_type = /obj/item/projectile/beam/anoxia
+	select_name = "suffocate"
 	fire_sound = 'sound/weapons/laser.ogg'
