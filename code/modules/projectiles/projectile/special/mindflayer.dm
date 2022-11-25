@@ -1,15 +1,19 @@
-/obj/item/projectile/beam/mindflayer
-	name = "flayer ray"
+/obj/item/projectile/beam/anoxia
+	name = "anoxia ray"
 	icon_state = "flayerlaser"
 	damage = 8
-	damage_type = OXY //mess up with the neurons telling your body to breathe.
+	damage_type = OXY //stop oxygen from beinng correctly processed by your cells.
 	flag = ENERGY
 	hitsound = 'sound/weapons/tap.ogg'
 	impact_effect_type = /obj/effect/temp_visual/impact_effect/purple_laser
 	light_color = LIGHT_COLOR_LAVENDER
 	eyeblur = 0
 
-/obj/item/projectile/beam/mindflayer/on_hit(atom/target, blocked = FALSE)
+/obj/item/projectile/beam/anoxia/mindflayer
+	name = "flayer ray"
+	damage = 6
+
+/obj/item/projectile/beam/anoxia/mindflayer/on_hit(atom/target, blocked = FALSE)
 	. = ..()
 	if(ishuman(target))
 		var/mob/living/carbon/human/M = target
