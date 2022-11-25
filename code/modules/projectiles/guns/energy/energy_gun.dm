@@ -132,13 +132,13 @@
 
 /obj/item/gun/energy/e_gun/nuclear
 	name = "advanced energy gun"
-	desc = "An energy gun with an experimental miniaturized nuclear reactor that can be refueled with uranium in the field."
+	desc = "An experimental energy gun with many settings and a miniaturized nuclear reactor that can be refueled with uranium in the field."
 	icon_state = "nucgun"
 	item_state = "nucgun"
 	pin = null
 	can_charge = FALSE
 	ammo_x_offset = 1
-	ammo_type = list(/obj/item/ammo_casing/energy/laser, /obj/item/ammo_casing/energy/disabler)
+	ammo_type = list(/obj/item/ammo_casing/energy/anoxia, /obj/item/ammo_casing/energy/xray, /obj/item/ammo_casing/energy/laser, /obj/item/ammo_casing/energy/disabler) //a lot of firemodes so it's really an ADVANCED egun
 	dead_cell = TRUE //Fuel not included, you will have to get irradiated to shoot this gun
 
 /obj/item/gun/energy/e_gun/nuclear/attackby(obj/item/I, mob/user) //plasmacutter but using uranium and devoid of safety measures
