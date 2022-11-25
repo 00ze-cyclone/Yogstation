@@ -132,58 +132,28 @@
 
 /obj/item/gun/energy/e_gun/nuclear
 	name = "advanced energy gun"
-	desc = "An energy gun with an experimental miniaturized nuclear reactor that automatically charges the internal power cell."
+	desc = "An energy gun with an experimental miniaturized nuclear reactor that can be refueled with uranium in the field."
 	icon_state = "nucgun"
 	item_state = "nucgun"
-	charge_delay = 5
 	pin = null
 	can_charge = FALSE
 	ammo_x_offset = 1
 	ammo_type = list(/obj/item/ammo_casing/energy/laser, /obj/item/ammo_casing/energy/disabler)
-	selfcharge = 1
-	var/reactor_overloaded
-	var/fail_tick = 0
-	var/fail_chance = 0
+	dead_cell = TRUE //Fuel not included, you will have to get irradiated to shoot this gun
 
-/obj/item/gun/energy/e_gun/nuclear/process()
-	if(fail_tick > 0)
-		fail_tick--
-	..()
-
-/obj/item/gun/energy/e_gun/nuclear/shoot_live_shot(mob/living/user, pointblank = 0, atom/pbtarget = null, message = 1)
-	failcheck()
-	update_icon()
-	..()
-
-/obj/item/gun/energy/e_gun/nuclear/proc/failcheck()
-	if(prob(fail_chance) && isliving(loc))
-		var/mob/living/M = loc
-		switch(fail_tick)
-			if(0 to 200)
-				fail_tick += (2*(fail_chance))
-				M.rad_act(40)
-				to_chat(M, span_userdanger("Your [name] feels warmer."))
-			if(201 to INFINITY)
-				SSobj.processing.Remove(src)
-				M.rad_act(80)
-				reactor_overloaded = TRUE
-				to_chat(M, span_userdanger("Your [name]'s reactor overloads!"))
-
-/obj/item/gun/energy/e_gun/nuclear/emp_act(severity)
-	. = ..()
-	if(. & EMP_PROTECT_SELF)
-		return
-	fail_chance = min(fail_chance + round(15/severity), 100)
-
-/obj/item/gun/energy/e_gun/nuclear/update_icon()
-	..()
-	if(reactor_overloaded)
-		add_overlay("[icon_state]_fail_3")
+/obj/item/gun/energy/e_gun/nuclear/attackby(obj/item/I, mob/user) //plasmacutter but using uranium and devoid of safety measures
+	var/charge_multiplier = 0 //2 = Refined stack, 1 = Ore
+	if(istype(I, /obj/item/stack/sheet/mineral/uranium))
+		charge_multiplier = 2
+	if(istype(I, /obj/item/stack/ore/uranium))
+		charge_multiplier = 1
+	if(charge_multiplier)
+		if(cell.charge == cell.maxcharge)
+			to_chat(user, span_notice("You try to insert [I] into [src]'s nulear reactor, but it's full."))
+			return
+		I.use(1)
+		cell.give(100*charge_multiplier)
+		user.radiation += (60*charge_multiplier) //You are putting you hand into a nuclear reactor to put more uranium in it
+		to_chat(user, span_notice("You insert [I] in [src]'s reactor, refueling it."))
 	else
-		switch(fail_tick)
-			if(0)
-				add_overlay("[icon_state]_fail_0")
-			if(1 to 150)
-				add_overlay("[icon_state]_fail_1")
-			if(151 to INFINITY)
-				add_overlay("[icon_state]_fail_2")
+		..()
