@@ -132,16 +132,16 @@
 
 /obj/item/gun/energy/e_gun/nuclear
 	name = "advanced energy gun"
-	desc = "An experimental energy gun with many settings and a miniaturized nuclear reactor that can be refueled with uranium in the field."
+	desc = "An experimental energy gun with many settings and a miniaturized nuclear reactor that can be refueled with uranium."
 	icon_state = "nucgun"
 	item_state = "nucgun"
 	pin = null
 	can_charge = FALSE
 	ammo_x_offset = 1
-	ammo_type = list(/obj/item/ammo_casing/energy/anoxia, /obj/item/ammo_casing/energy/xray, /obj/item/ammo_casing/energy/laser, /obj/item/ammo_casing/energy/disabler) //a lot of firemodes so it's really an ADVANCED egun
+	ammo_type = list(/obj/item/ammo_casing/energy/disabler, /obj/item/ammo_casing/energy/laser, /obj/item/ammo_casing/energy/xray, /obj/item/ammo_casing/energy/anoxia) //a lot of firemodes so it's really an ADVANCED egun
 	dead_cell = TRUE //Fuel not included, you will have to get irradiated to shoot this gun
 
-/obj/item/gun/energy/e_gun/nuclear/attackby(obj/item/I, mob/user) //plasmacutter but using uranium and devoid of safety measures
+/obj/item/gun/energy/e_gun/nuclear/attackby(obj/item/I, mob/user) //plasmacutter but using uranium and devoid of any safety measures
 	var/charge_multiplier = 0 //2 = Refined stack, 1 = Ore
 	if(istype(I, /obj/item/stack/sheet/mineral/uranium))
 		charge_multiplier = 2
@@ -151,9 +151,15 @@
 		if(cell.charge == cell.maxcharge)
 			to_chat(user, span_notice("You try to insert [I] into [src]'s nulear reactor, but it's full."))
 			return
-		I.use(1)
-		cell.give(100*charge_multiplier)
-		user.radiation += (60*charge_multiplier) //You are putting you hand into a nuclear reactor to put more uranium in it
-		to_chat(user, span_notice("You insert [I] in [src]'s reactor, refueling it."))
+		to_chat(user, span_notice("You start delicately inserting [I] in [src]'s reactor, refueling it."))
+		if(do_after(user, 0.5 SECONDS, src))
+			I.use(1)
+			cell.give(100*charge_multiplier)
+			user.radiation += (60*charge_multiplier) //You are putting you hand into a nuclear reactor to put more uranium in it
+		else
+			if(!(previous_loc == user.loc))
+				to_chat(user, span_boldwarning("You move, bumping your hand on [src]'s nulear reactor's core!") //when I said devoid of ANY safety measures I meant it
+				user.adjustToxLoss(5*charge_multiplier) //straigth toxin damage rather than rads because we want the user to be punished immediately for moving, not in 2 hours
+				user.radiation += (100*charge_multiplier) //but also rads because you touched a fucking nuclear reactor's core
 	else
 		..()
