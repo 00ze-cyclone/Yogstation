@@ -163,3 +163,10 @@
 				user.radiation += (100*charge_multiplier) //but also rads because you touched a fucking nuclear reactor's core
 	else
 		..()
+
+/obj/item/gun/energy/e_gun/bouncer
+	name = "bouncer energy gun"
+	desc = "A special energy gun shooting ricocheting projectiles, has two settings: disable and suffocate."
+	icon_state = "bouncer"
+	ammo_type = list(/obj/item/ammo_casing/energy/disabler/bounce, /obj/item/ammo_casing/energy/anoxia/bounce)
+	pin = null
