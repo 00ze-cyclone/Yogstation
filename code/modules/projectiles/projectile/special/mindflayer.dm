@@ -11,7 +11,7 @@
 
 /obj/item/projectile/beam/anoxia/mindflayer
 	name = "flayer ray"
-	damage = 6
+	damage = 8
 
 /obj/item/projectile/beam/anoxia/mindflayer/on_hit(atom/target, blocked = FALSE)
 	. = ..()
