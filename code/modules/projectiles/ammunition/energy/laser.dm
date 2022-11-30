@@ -81,4 +81,9 @@
 /obj/item/ammo_casing/energy/anoxia
 	projectile_type = /obj/item/projectile/beam/anoxia
 	select_name = "suffocate"
+	e_cost = 50
 	fire_sound = 'sound/weapons/laser.ogg'
+
+/obj/item/ammo_casing/energy/anoxia/bounce
+	projectile_type = /obj/item/projectile/beam/anoxia/bounce
+	e_cost = 62
