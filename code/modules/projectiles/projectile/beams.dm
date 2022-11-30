@@ -94,6 +94,16 @@
 	muzzle_type = /obj/effect/projectile/muzzle/disabler
 	impact_type = /obj/effect/projectile/impact/disabler
 
+/obj/item/projectile/beam/disabler/bounce
+	name = "bouncing disabler ball"
+	icon_state = 
+	damage = 20
+	ricochets_max = 5
+	ricochet_chance = 100
+
+/obj/item/projectile/beam/disabler/bounce/check_ricochet_flag(atom/A)
+	return TRUE //whatever it is, we bounce on it
+
 /obj/item/projectile/beam/pulse
 	name = "pulse"
 	icon_state = "u_laser"
