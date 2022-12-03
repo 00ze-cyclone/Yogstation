@@ -96,7 +96,7 @@
 
 /obj/item/projectile/beam/disabler/bounce
 	name = "bouncing disabler ball"
-	icon_state = 
+	icon_state = "omnibouncer"
 	damage = 20
 	ricochets_max = 5
 	ricochet_chance = 100
