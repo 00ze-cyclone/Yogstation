@@ -23,7 +23,7 @@
 
 /obj/item/projectile/beam/anoxia/bounce
 	name = "bouncing anoxia ball"
-	icon_state = 
+	icon_state = "flayerbouncer"
 	damage = 6
 	ricochets_max = 5
 	ricochet_chance = 100
