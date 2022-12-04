@@ -143,8 +143,9 @@
 	ammo_type = list(/obj/item/ammo_casing/energy/disabler, /obj/item/ammo_casing/energy/laser, /obj/item/ammo_casing/energy/xray, /obj/item/ammo_casing/energy/anoxia) //a lot of firemodes so it's really an ADVANCED egun
 	dead_cell = TRUE //Fuel not included, you will have to get irradiated to shoot this gun
 
-/obj/item/gun/energy/e_gun/nuclear/attackby(obj/item/I, mob/user) //plasmacutter but using uranium and devoid of any safety measures
+/obj/item/gun/energy/e_gun/nuclear/attackby(obj/item/I, mob/living/carbon/user) //plasmacutter but using uranium and devoid of any safety measures
 	var/charge_multiplier = 0 //2 = Refined stack, 1 = Ore
+	var/previous_loc = user.loc
 	if(istype(I, /obj/item/stack/sheet/mineral/uranium))
 		charge_multiplier = 2
 	if(istype(I, /obj/item/stack/ore/uranium))
