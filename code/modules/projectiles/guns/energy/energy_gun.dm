@@ -162,7 +162,7 @@
 			if(!(previous_loc == user.loc))
 				to_chat(user, span_boldwarning("You move, bumping your hand on [src]'s nulear reactor's core!")) //when I said devoid of ANY safety measures I meant it
 				user.adjustToxLoss(5*charge_multiplier) //straigth toxin damage rather than rads because we want the user to be punished immediately for moving, not in 2 hours
-				user.radiation += (100*charge_multiplier) //but also rads because you touched a fucking nuclear reactor's core
+				user.radiation += (200*charge_multiplier) //but also rads because you touched a fucking nuclear reactor's core
 	else
 		..()
 
