@@ -154,7 +154,7 @@
 	cut_overlays()
 	var/obj/item/ammo_casing/energy/shot = ammo_type[select]
 	var/iconState = "[icon_state]_charge"
-	var/itemState = "[item_state]"
+	var/itemState = null
 	if(!initial(item_state))
 		itemState = icon_state
 	if (modifystate)
