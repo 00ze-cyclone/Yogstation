@@ -155,10 +155,11 @@
 			to_chat(user, span_notice("You try to insert [I] into [src]'s nulear reactor, but it's full."))
 			return
 		to_chat(user, span_notice("You start delicately inserting [I] in [src]'s reactor, refueling it."))
-		if(do_after(user, 1 SECONDS, src))
+		if(do_after(user, 2 SECONDS, src))
 			I.use(1)
-			cell.give(100*charge_multiplier)
-			user.radiation += (60*charge_multiplier) //You are putting you hand into a nuclear reactor to put more uranium in it
+			cell.give(250*charge_multiplier)
+			user.radiation += (150*charge_multiplier) //You are putting you hand into a nuclear reactor to put more uranium in it
+			update_icon(TRUE)
 		else
 			if(!(previous_loc == user.loc))
 				to_chat(user, span_boldwarning("You move, bumping your hand on [src]'s nulear reactor's core!")) //when I said devoid of ANY safety measures I meant it
