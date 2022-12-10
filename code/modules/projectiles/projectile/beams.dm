@@ -24,12 +24,24 @@
 	wound_bonus = -30
 	bare_wound_bonus = 40
 
-//overclocked laser, does a bit more damage but has much higher wound power (-0 vs -20)
+//overclocked laser, does a bit more damage but has much higher wound power (-0 vs -30)
 /obj/item/projectile/beam/laser/hellfire
 	name = "hellfire laser"
 	damage = 25
 	wound_bonus = 0
 	speed = 0.6 // higher power = faster, that's how light works right
+
+//the successor to the hellfire, less damage and wounds (though still more than regular laser) but make people burn
+/obj/item/projectile/beam/laser/hellfire/hellburn
+	name = "hellburn laser"
+	damage = 15
+	wound_bonus = -10
+
+/obj/item/projectile/beam/laser/hellfire/hellburn/on_hit(atom/target, blocked = FALSE)
+	if((blocked != 100) && iscarbon(target))
+		var/mob/living/carbon/M = target
+		M.adjust_fire_stacks(2)
+	return ..()
 
 /obj/projectile/beam/laser/hellfire/Initialize()
 	. = ..()
@@ -65,6 +77,17 @@
 	name = "laser pellet"
 	icon_state = "scatterlaser"
 	damage = 5
+
+/obj/item/projectile/beam/scatter/incendiary
+	name = "incendiary laser pellet"
+	damage = 0 //just set you on fire
+
+/obj/item/projectile/beam/scatter/incendiary/on_hit(atom/target, blocked = FALSE)
+	if((blocked != 100) && iscarbon(target))
+		var/mob/living/carbon/M = target
+		M.adjust_fire_stacks(1)
+		M.IgniteMob()
+	return ..()
 
 /obj/item/projectile/beam/xray
 	name = "\improper X-ray beam"

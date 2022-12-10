@@ -175,14 +175,12 @@
 	ammo_x_offset = 2
 	pin = null
 
-/obj/item/gun/energy/e_gun/thermalrevolver
-	name = "thermal revolver"
-	desc ="A revolver containing weaponized nanites replicating when given energy from a recharger. The nanites come programmed with 2 settings to take advantage of the internal temperature of targets: \
-	magma that will make the target's flesh explode if severely cold and frost that will make the target's flesh shatter if severely hot."
-	icon_state = "thermalrevolver"
-	ammo_type = list(/obj/item/ammo_casing/energy/magma, /obj/item/ammo_casing/energy/frost)
-	cell_type = /obj/item/stock_parts/cell/mini_egun //6 shots like a revolver
-	can_flashlight = FALSE
-	charge_sections = 3
-	shaded_charge = 1
+/obj/item/gun/energy/e_gun/hellburn
+	name = "hellburn laser rifle"
+	desc = "The bulkier successor of the hellfire laser gun, in an attempt to make it appear less horrible than its predecessor to the public it's wounding capabilities have been reduced in favor of making it ignite the flesh of its targets. \
+	More energy efficient than the hellfire, it possess also a second setting spreading out the projectiles to cover a larger area to set ablaze." //If you wonder, no that new gun won't succed in improving NT Weapon R&D public relations
+	icon_state = "hellburn"
+	ammo_type = list(/obj/item/ammo_casing/energy/laser/hellfire/hellburn, /obj/item/ammo_casing/energy/laser/scatter/incendiary)
+	w_class = WEIGHT_CLASS_BULKY
+	ammo_x_offset = 3
 	pin = null

@@ -7,6 +7,10 @@
 	e_cost = 130
 	select_name = "maim"
 
+/obj/item/ammo_casing/energy/laser/hellfire/hellburn
+	projectile_type = /obj/item/projectile/beam/laser/hellfire/hellburn
+	e_cost = 125
+
 /obj/item/ammo_casing/energy/lasergun
 	projectile_type = /obj/item/projectile/beam/laser
 	e_cost = 83
@@ -26,6 +30,11 @@
 	pellets = 5
 	variance = 25
 	select_name = "scatter"
+
+/obj/item/ammo_casing/energy/laser/scatter/incendiary
+	projectile_type = /obj/item/projectile/beam/scatter/incendiary
+	pellets = 3
+	variance = 15
 
 /obj/item/ammo_casing/energy/laser/scatter/disabler
 	projectile_type = /obj/item/projectile/beam/disabler
