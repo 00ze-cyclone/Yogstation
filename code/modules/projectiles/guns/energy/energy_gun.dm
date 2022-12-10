@@ -184,3 +184,9 @@
 	w_class = WEIGHT_CLASS_BULKY
 	ammo_x_offset = 3
 	pin = null
+
+/obj/item/gun/energy/e_gun/warcrime
+	name = "sweeper energy gun"
+	desc = "A specialist energy weapon designed for thorough eradication of all life with minimal damages to the rest. Has three settings: maim, irradiate and suffocate."
+	icon_state = "sweeper"
+	ammo_type = list(/obj/item/ammo_casing/energy/laser/hellfire/hellburn, /obj/item/ammo_casing/energy/xray, /obj/item/ammo_casing/energy/anoxia)
