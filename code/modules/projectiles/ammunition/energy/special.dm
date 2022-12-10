@@ -75,3 +75,14 @@
 	e_cost = 200
 	select_name = "stun"
 	projectile_type = /obj/item/projectile/energy/tesla/revolver
+
+
+/obj/item/ammo_casing/energy/magma
+	fire_sound = 'sound/weapons/genhit.ogg'
+	select_name = "magma"
+	projectile_type = /obj/item/projectile/bullet/magma
+
+/obj/item/ammo_casing/energy/frost
+	fire_sound = 'sound/weapons/genhit.ogg'
+	select_name = "frost"
+	projectile_type = /obj/item/projectile/bullet/frost
