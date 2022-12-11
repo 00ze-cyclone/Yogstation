@@ -16,7 +16,7 @@
 
 /obj/item/projectile/temp/hot
 	name = "heat beam"
-	temperature = 400
+	temperature = 700
 
 /obj/item/projectile/temp/cryo
 	name = "cryo beam"

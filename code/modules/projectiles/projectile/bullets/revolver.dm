@@ -157,6 +157,6 @@
 	if(how_hot_is_target > danger_zone)
 		var/limb_hit = hot_target.check_limb_hit(def_zone)
 		hot_target.Knockdown(10)
-		hot_target.apply_damage(20, BRUTE, limb_hit, 0, 30, 0, SHARP_EDGED) //your flesh shatter like the rocks in the desert at night
+		hot_target.apply_damage(20, BRUTE, limb_hit, 0, wound_bonus = 30, 0, sharpness = SHARP_EDGED) //your flesh shatter like the rocks in the desert at night
 		hot_target.bodytemperature = BODYTEMP_NORMAL //avoids repeat knockdowns, maybe could be used to cool down again?
 		playsound(hot_target, 'sound/weapons/sonic_jackhammer.ogg', 30, TRUE, -1)

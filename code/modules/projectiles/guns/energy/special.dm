@@ -408,7 +408,6 @@
 	cell_type = /obj/item/stock_parts/cell/mini_egun //6 shots like a revolver
 	can_flashlight = FALSE
 	charge_sections = 3
-	shaded_charge = 1
 	pin = null
 
 /obj/item/gun/energy/laser/instakill
