@@ -167,7 +167,7 @@
 		return
 	if(get_charge())
 		use_power((cell.charge/3)/(severity*2))
-		take_damage((40 + 20 * leg_overload_mode / severity), BURN, ENERGY, 1)
+		take_damage((40 / severity), BURN, ENERGY, 1)
 	log_message("EMP detected", LOG_MECHA, color="red")
 
 	if(istype(src, /obj/mecha/combat))
