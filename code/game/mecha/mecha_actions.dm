@@ -210,7 +210,7 @@
 	if(chassis.leg_overload_mode)
 		chassis.leg_overload_mode = 1
 		chassis.bumpsmash = 1
-		chassis.step_in = min(1, round(chassis.step_in/2))
+		chassis.step_in = min(1, round(chassis.step_in/3))
 		chassis.step_energy_drain = max(chassis.overload_step_energy_drain_min,chassis.step_energy_drain*chassis.leg_overload_coeff)
 		chassis.occupant_message(span_danger("You enable leg actuators overload."))
 	else

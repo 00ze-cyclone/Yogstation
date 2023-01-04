@@ -39,15 +39,20 @@
 				booster_deflection_modifier *= B.deflect_coeff
 				booster_damage_modifier *= B.damage_coeff
 				break
+	if(leg_overload_mode)
+		booster_deflection_modifier -= 5
+		booster_damage_modifier *= 2
 
 	if(attack_dir)
 		var/facing_modifier = get_armour_facing(dir2angle(attack_dir) - dir2angle(dir))
 		booster_damage_modifier /= facing_modifier
 		booster_deflection_modifier *= facing_modifier
+
 	if(prob(deflect_chance * booster_deflection_modifier))
 		visible_message(span_danger("[src]'s armour deflects the attack!"))
 		log_message("Armor saved.", LOG_MECHA)
 		return 0
+
 	if(.)
 		. *= booster_damage_modifier
 
@@ -162,7 +167,7 @@
 		return
 	if(get_charge())
 		use_power((cell.charge/3)/(severity*2))
-		take_damage(40 / severity, BURN, ENERGY, 1)
+		take_damage((40 + 20 * leg_overload_mode / severity), BURN, ENERGY, 1)
 	log_message("EMP detected", LOG_MECHA, color="red")
 
 	if(istype(src, /obj/mecha/combat))

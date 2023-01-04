@@ -158,6 +158,10 @@
 	var/damage_coeff = 0.8
 	selectable = 0
 
+/obj/item/mecha_parts/mecha_equipment/anticcw_armor_booster/can_attach(obj/mecha/combat/gygax/M)
+	if(..() && istype(M))
+		return FALSE //Armor is for those who care about their own safety, you took a Gygax
+
 /obj/item/mecha_parts/mecha_equipment/anticcw_armor_booster/proc/attack_react()
 	if(action_checks(src))
 		start_cooldown()
@@ -175,6 +179,10 @@
 	var/deflect_coeff = 1.15
 	var/damage_coeff = 0.8
 	selectable = 0
+
+/obj/item/mecha_parts/mecha_equipment/antiproj_armor_booster/can_attach(obj/mecha/combat/gygax/M)
+	if(..() && istype(M))
+		return FALSE //Armor is for those who care about their own safety, you took a Gygax
 
 /obj/item/mecha_parts/mecha_equipment/antiproj_armor_booster/proc/projectile_react()
 	if(action_checks(src))
@@ -195,6 +203,11 @@
 	var/icon/droid_overlay
 	var/list/repairable_damage = list(MECHA_INT_TEMP_CONTROL,MECHA_INT_TANK_BREACH)
 	selectable = 0
+
+/obj/item/mecha_parts/mecha_equipment/repair_droid/can_attach(obj/mecha/combat/gygax/M)
+	if(..() && istype(M))
+		return FALSE //No repairs for Gygax, take more violence instead
+
 
 /obj/item/mecha_parts/mecha_equipment/repair_droid/Destroy()
 	STOP_PROCESSING(SSobj, src)
