@@ -118,6 +118,18 @@
 	pin = null
 	ammo_x_offset = 3
 
+///Hellburn
+/obj/item/gun/energy/hellburn
+	name = "hellburn laser rifle"
+	desc = "The bulkier successor of the hellfire laser gun, its wounding capabilities have been reduced in favor of incineration of targets, it possess also a second setting spreading out the projectiles to set entire crowds ablaze."
+	icon_state = "hellburn"
+	item_state = null
+	ammo_type = list(/obj/item/ammo_casing/energy/laser/hellfire/hellburn, /obj/item/ammo_casing/energy/laser/scatter/incendiary)
+	w_class = WEIGHT_CLASS_BULKY
+	ammo_x_offset = 3
+	modifystate = 1
+	pin = null
+
 ////////Laser Tag////////////////////
 
 /obj/item/gun/energy/laser/bluetag

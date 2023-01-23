@@ -371,6 +371,10 @@
 	ui_x = -704
 	ui_y = -736
 
+/datum/techweb_node/thermal_weapons
+	ui_x = -576
+	ui_y = -768
+
 /datum/techweb_node/syndicate_basic
 	ui_x = -384
 	ui_y = -672

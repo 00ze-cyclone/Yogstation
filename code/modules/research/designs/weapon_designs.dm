@@ -240,6 +240,16 @@
 	category = list("Weapons")
 	departmental_flags = DEPARTMENTAL_FLAG_SECURITY
 
+/datum/design/thermal_revolver
+	name = "Thermal Revolver"
+	desc = "A nanite revolver able to use the internal temperature of targets against them."
+	id = "thermal_revolver"
+	build_type = PROTOLATHE
+	materials = list(/datum/material/iron = 5000, /datum/material/silver = 2000, /datum/material/titanium = 2000, /datum/material/bluespace = 1000)
+	build_path = /obj/item/gun/energy/e_gun/thermal_revolver
+	category = list("Weapons")
+	departmental_flags = DEPARTMENTAL_FLAG_ARMORY
+
 /datum/design/flora_gun
 	name = "Floral Somatoray"
 	desc = "A tool that discharges controlled radiation which induces mutation in plant cells. Harmless to other organic life."
@@ -427,6 +437,17 @@
 	build_path = /obj/item/gun/energy/e_gun/bouncer
 	category = list("Weapons")
 	departmental_flags = DEPARTMENTAL_FLAG_SECURITY
+
+/datum/design/hellburn
+	name = "Hellburn Laser Rifle"
+	desc = "A laser weapon designed to be the powerful and less horrifying successor to the hellfire laser gun, complete success for the first part, less so for the latter." //If you wonder, no that new gun won't succed in improving NT Weapon R&D public relations.
+	id = "hellburn"
+	build_type = PROTOLATHE
+	materials = list(/datum/material/iron = 10000, /datum/material/glass = 5000, /datum/material/plasma = 3000, /datum/material/gold = 1000)
+	reagents_list = list(/datum/reagent/napalm = 20)
+	build_path = /obj/item/gun/energy/hellburn
+	category = list("Weapons")
+	departmental_flags = DEPARTMENTAL_FLAG_ARMORY
 
 /datum/design/simple_sight
 	name = "Simple Sight"

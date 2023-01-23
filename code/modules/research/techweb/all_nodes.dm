@@ -681,6 +681,14 @@
 	design_ids = list("nuclear_gun", "xray_laser")
 	research_costs = list(TECHWEB_POINT_TYPE_GENERIC = 2500)
 
+/datum/techweb_node/thermal_weapons
+	id = "thermal_weapons"
+	display_name = "Thermal Weaponry"
+	description = "Weapons redefining the laws of thermodynamics."
+	prereq_ids = list("adv_weaponry", "adv_plasma")
+	design_ids = list("temp_gun", "thermal_revolver")
+	research_costs = list(TECHWEB_POINT_TYPE_GENERIC = 2500)
+
 /datum/techweb_node/medical_weapons
 	id = "medical_weapons"
 	display_name = "Medical Weaponry"
@@ -694,7 +702,7 @@
 	display_name = "Beam Weaponry"
 	description = "Various basic beam weapons"
 	prereq_ids = list("adv_weaponry")
-	design_ids = list("temp_gun", "bouncer_egun")
+	design_ids = list("bouncer_egun", "hellburn")
 	research_costs = list(TECHWEB_POINT_TYPE_GENERIC = 2500)
 
 /datum/techweb_node/adv_beam_weapons

@@ -130,3 +130,42 @@
 		var/atom/movable/M = target
 		var/atom/throw_target = get_edge_target_turf(M, get_dir(src, get_step_away(M, src)))
 		M.safe_throw_at(throw_target, 2, 2) //Extra ten damage if they hit a wall, resolves against melee armor
+
+
+/obj/item/projectile/bullet/magma
+	name = "magma nanite bullet"
+	damage = 15
+	damage_type = BURN
+
+/obj/item/projectile/bullet/magma/on_hit(atom/target, blocked = FALSE)
+	..()
+	if(!ishuman(target))
+		return
+
+	var/mob/living/carbon/cold_target = target
+	var/how_cold_is_target = cold_target.bodytemperature
+	var/danger_zone = BODYTEMP_COLD_DAMAGE_LIMIT - 150
+	if(how_cold_is_target < danger_zone)
+		explosion(cold_target, devastation_range = -1, heavy_impact_range = -1, light_impact_range = 2, flame_range = 3) //maybe stand back a bit
+		cold_target.bodytemperature = BODYTEMP_NORMAL //avoids repeat explosions, maybe could be used to heat up again?
+		playsound(cold_target, 'sound/weapons/sear.ogg', 30, TRUE, -1)
+
+/obj/item/projectile/bullet/frost
+	name = "frost nanite bullet"
+	damage = 15
+	sharpness = SHARP_EDGED
+
+/obj/item/projectile/bullet/frost/on_hit(atom/target, blocked = FALSE)
+	..()
+	if(!ishuman(target))
+		return
+
+	var/mob/living/carbon/hot_target = target
+	var/how_hot_is_target = hot_target.bodytemperature
+	var/danger_zone = BODYTEMP_HEAT_DAMAGE_LIMIT + 300
+	if(how_hot_is_target > danger_zone)
+		var/limb_hit = hot_target.check_limb_hit(def_zone)
+		hot_target.Knockdown(10)
+		hot_target.apply_damage(15, BRUTE, limb_hit, 0, wound_bonus = 30, 0, sharpness = SHARP_EDGED) //your flesh shatter like the rocks in the desert at night
+		hot_target.bodytemperature = BODYTEMP_NORMAL //avoids repeat knockdowns, maybe could be used to cool down again?
+		playsound(hot_target, 'sound/weapons/sonic_jackhammer.ogg', 30, TRUE, -1)
