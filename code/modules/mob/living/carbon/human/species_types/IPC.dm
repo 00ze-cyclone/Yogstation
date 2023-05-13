@@ -5,7 +5,7 @@
 	id = "ipc"
 	say_mod = "states" //inherited from a user's real species
 	sexes = FALSE
-	species_traits = list(NOTRANSSTING,NOEYESPRITES,NO_DNA_COPY,ROBOTIC_LIMBS,NOZOMBIE,MUTCOLORS,NOHUSK,AGENDER,NOBLOOD)
+	species_traits = list(NOTRANSSTING,NOEYESPRITES,NO_DNA_COPY,ROBOTIC_LIMBS,NOZOMBIE,MUTCOLORS,NOHUSK,AGENDER,NOBLOOD,NO_UNDERWEAR)
 	inherent_traits = list(TRAIT_RESISTCOLD,TRAIT_RADIMMUNE,TRAIT_COLDBLOODED,TRAIT_LIMBATTACHMENT,TRAIT_EASYDISMEMBER,TRAIT_NOCRITDAMAGE,TRAIT_GENELESS,TRAIT_MEDICALIGNORE,TRAIT_NOCLONE,TRAIT_TOXIMMUNE,TRAIT_EASILY_WOUNDED,TRAIT_NODEFIB)
 	inherent_biotypes = list(MOB_ROBOTIC, MOB_HUMANOID)
 	mutantbrain = /obj/item/organ/brain/positron
@@ -38,8 +38,11 @@
 	screamsound = 'goon/sound/robot_scream.ogg'
 	allow_numbers_in_name = TRUE
 	deathsound = 'sound/voice/borg_deathsound.ogg'
+	special_step_sounds = list('sound/effects/footstep/catwalk1.ogg', 'sound/effects/footstep/catwalk2.ogg', 'sound/effects/footstep/catwalk3.ogg', 'sound/effects/footstep/catwalk4.ogg')
+	special_walk_sounds = list('sound/effects/servostep.ogg')
 	wings_icon = "Robotic"
 	var/saved_screen //for saving the screen when they die
+	species_language_holder = /datum/language_holder/machine
 	changesource_flags = MIRROR_BADMIN | WABBAJACK | MIRROR_MAGIC | MIRROR_PRIDE | ERT_SPAWN | RACE_SWAP | SLIME_EXTRACT
 	// Hats need to be 1 up
 	offset_features = list(OFFSET_HEAD = list(0,1))
@@ -88,7 +91,7 @@ datum/species/ipc/on_species_loss(mob/living/carbon/C)
 	saved_screen = C.dna.features["ipc_screen"]
 	C.dna.features["ipc_screen"] = "BSOD"
 	C.update_body()
-	addtimer(CALLBACK(src, .proc/post_death, C), 5 SECONDS)
+	addtimer(CALLBACK(src, PROC_REF(post_death), C), 5 SECONDS)
 
 /datum/species/ipc/proc/post_death(mob/living/carbon/C)
 	if(C.stat < DEAD)
@@ -207,7 +210,7 @@ datum/species/ipc/on_species_loss(mob/living/carbon/C)
 	H.Stun(9 SECONDS) // No moving either
 	H.dna.features["ipc_screen"] = "BSOD"
 	H.update_body()
-	addtimer(CALLBACK(src, .proc/afterrevive, H), 0)
+	addtimer(CALLBACK(src, PROC_REF(afterrevive), H), 0)
 	return
 
 /datum/species/ipc/proc/afterrevive(mob/living/carbon/human/H)
@@ -307,8 +310,8 @@ ipc martial arts stuff
 			add_empproof(H)
 			throw_lightning(H)
 		else//if just getting hit
-			addtimer(CALLBACK(src, .proc/add_empproof, H), 1, TIMER_UNIQUE)
-		addtimer(CALLBACK(src, .proc/remove_empproof, H), 5 SECONDS, TIMER_OVERRIDE | TIMER_UNIQUE)//removes the emp immunity after a 5 second delay
+			addtimer(CALLBACK(src, PROC_REF(add_empproof), H), 1, TIMER_UNIQUE)
+		addtimer(CALLBACK(src, PROC_REF(remove_empproof), H), 5 SECONDS, TIMER_OVERRIDE | TIMER_UNIQUE)//removes the emp immunity after a 5 second delay
 	else if(severity == EMP_HEAVY)
 		H.emote("warn") // *chuckles* i'm in danger!
 
