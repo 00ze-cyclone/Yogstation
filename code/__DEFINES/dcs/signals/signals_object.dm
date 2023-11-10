@@ -220,7 +220,7 @@
 #define COMSIG_CLOSET_DELIVERED "crate_delivered"
 
 ///Eigenstasium
-///From base of [/datum/controller/subsystem/eigenstates/proc/use_eigenlinked_atom]: (var/target)
+///From base of [/datum/controller/subsystem/eigenstates/proc/use_eigenlinked_atom]: (target)
 #define COMSIG_EIGENSTATE_ACTIVATE "eigenstate_activate"
 
 // /obj signals for economy
@@ -389,7 +389,7 @@
 ///from /datum/action/vehicle/sealed/headlights/vim/Trigger(): (headlights_on)
 #define COMSIG_VIM_HEADLIGHTS_TOGGLED "vim_headlights_toggled"
 
-// /obj/vehicle/sealed/mecha signals
+// /obj/mecha signals
 
 /// sent if you attach equipment to mecha
 #define COMSIG_MECHA_EQUIPMENT_ATTACHED "mecha_equipment_attached"

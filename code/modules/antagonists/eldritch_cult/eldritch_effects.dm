@@ -57,7 +57,7 @@
 			continue
 		if(istype(atom_in_range,/mob/living))
 			var/mob/living/living_in_range = atom_in_range
-			if(living_in_range.stat != DEAD || living_in_range == user) // we only accept corpses, no living beings allowed.
+			if(!living_in_range.stat || living_in_range == user) // we only accept people in crit, no healthy beings allowed.
 				continue
 		atoms_in_range += atom_in_range
 	for(var/X in transmutations)
@@ -205,6 +205,7 @@
 	icon_state = "pierced_illusion"
 	anchored = TRUE
 	resistance_flags = FIRE_PROOF | UNACIDABLE | ACID_PROOF
+	mouse_opacity = MOUSE_OPACITY_OPAQUE
 
 /obj/effect/broken_illusion/attack_hand(mob/living/user)
 	if(!ishuman(user))
@@ -213,7 +214,7 @@
 	var/datum/antagonist/bloodsucker/bloodsuckerdatum = user.mind.has_antag_datum(/datum/antagonist/bloodsucker)
 	if(IS_HERETIC(human_user))
 		to_chat(human_user, span_boldwarning("You know better than to tempt forces out of your control!"))
-	if(IS_BLOODSUCKER(human_user) || bloodsuckerdatum.my_clan == CLAN_LASOMBRA)
+	if(IS_BLOODSUCKER(human_user) || bloodsuckerdatum.my_clan?.get_clan() == CLAN_LASOMBRA)
 		to_chat(human_user, span_boldwarning("This shard has already been harvested!"))
 	else
 		var/obj/item/bodypart/arm = human_user.get_active_hand()
@@ -274,7 +275,7 @@
 	///who has already used this influence
 	var/list/siphoners = list()
 
-/obj/effect/reality_smash/Initialize()
+/obj/effect/reality_smash/Initialize(mapload)
 	. = ..()
 	GLOB.reality_smash_track.smashes += src
 	img = image(icon, src, "reality_smash", OBJ_LAYER)
@@ -497,3 +498,54 @@
 #undef PENANCE_TRAUMA_BASIC
 #undef TRAUMA_ADV_CAP
 #undef TRAUMA_BASIC_CAP
+
+/obj/effect/cosmic_diamond
+	name = "Cosmic Diamond"
+	icon = 'icons/effects/eldritch.dmi'
+	icon_state = "cosmic_diamond"
+	anchored = TRUE
+
+/obj/effect/temp_visual/cosmic_cloud
+	name = "Cosmic Cloud"
+	icon = 'icons/effects/eldritch.dmi'
+	icon_state = "cosmic_cloud"
+	anchored = TRUE
+	duration = 8
+
+/obj/effect/temp_visual/cosmic_explosion
+	name = "Cosmic Explosion"
+	icon = 'icons/effects/64x64.dmi'
+	icon_state = "cosmic_explosion"
+	anchored = TRUE
+	duration = 5
+	pixel_x = -16
+	pixel_y = -16
+
+/obj/effect/temp_visual/space_explosion
+	name = "Space Explosion"
+	icon = 'icons/effects/64x64.dmi'
+	icon_state = "space_explosion"
+	anchored = TRUE
+	duration = 5
+	pixel_x = -16
+	pixel_y = -16
+
+/obj/effect/temp_visual/cosmic_domain
+	name = "Cosmic Domain"
+	icon = 'icons/effects/160x160.dmi'
+	icon_state = "cosmic_domain"
+	anchored = TRUE
+	duration = 6
+	pixel_x = -64
+	pixel_y = -64
+
+/obj/effect/temp_visual/cosmic_gem
+	name = "cosmic gem"
+	icon = 'icons/effects/eldritch.dmi'
+	icon_state = "cosmic_gem"
+	duration = 12
+
+/obj/effect/temp_visual/cosmic_gem/Initialize(mapload)
+	. = ..()
+	pixel_x = rand(-12, 12)
+	pixel_y = rand(-9, 0)

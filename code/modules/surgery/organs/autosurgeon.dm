@@ -17,7 +17,7 @@
 	if(starting_organ)
 		insert_organ(new starting_organ(src))
 
-/obj/item/autosurgeon/proc/insert_organ(var/obj/item/I)
+/obj/item/autosurgeon/proc/insert_organ(obj/item/I)
 	storedorgan = I
 	I.forceMove(src)
 	name = "[initial(name)] ([storedorgan.name])"
@@ -41,7 +41,7 @@
 			if(user.getorganslot(bastard.slot)) //NEVERMIND WE ARE NOT BALLING
 				bastard.zone = original_zone //MISSION ABORT
 				bastard.SetSlotFromZone()
-			bastard.update_icon()
+			bastard.update_appearance(UPDATE_ICON)
 	storedorgan.Insert(user)//insert stored organ into the user
 	user.visible_message(span_notice("[user] presses a button on [src], and you hear a short mechanical noise."), span_notice("You feel a sharp sting as [src] plunges into your body."))
 	playsound(get_turf(user), 'sound/weapons/circsawhit.ogg', 50, 1)
@@ -123,6 +123,9 @@
 /obj/item/autosurgeon/reviver
 	starting_organ = /obj/item/organ/cyberimp/chest/reviver
 
+/obj/item/autosurgeon/reviver/syndicate
+	starting_organ = /obj/item/organ/cyberimp/chest/reviver/syndicate
+
 /obj/item/autosurgeon/medibeam
 	uses = 1
 	starting_organ = /obj/item/organ/cyberimp/arm/medibeam
@@ -145,7 +148,7 @@
 			implant.zone = BODY_ZONE_R_ARM
 			to_chat(user, span_notice("You change the autosurgeon to target the right arm."))
 		implant.SetSlotFromZone()
-		implant.update_icon() //If for whatever reason, the implant is removed from the autosurgeon after it's switched
+		implant.update_appearance(UPDATE_ICON) //If for whatever reason, the implant is removed from the autosurgeon after it's switched
 
 /obj/item/autosurgeon/arm/syndicate/syndie_mantis
 	uses = 1
@@ -275,7 +278,7 @@
 //not a derivative of autosurgeons because things get fucky
 //someone is more than welcome to combine the two if they want, just make sure it actually works
 /obj/item/multisurgeon
-	name = "autosurgeon"
+	name = "multisurgeon"
 	desc = "A device that automatically inserts an implant or organ into the user without the hassle of extensive surgery. It has a slot to insert implants/organs and a screwdriver slot for removing accidentally added items."
 	icon = 'icons/obj/device.dmi'
 	icon_state = "autoimplanter"
@@ -291,16 +294,17 @@
 	for(var/organ in starting_organ)
 		insert_organ(new organ(src))
 
-/obj/item/multisurgeon/proc/insert_organ(var/obj/item/I)
+/obj/item/multisurgeon/proc/insert_organ(obj/item/I)
 	storedorgan |= I
 	I.forceMove(src)
+	name = "[initial(name)] ([I.name])"
 
 /obj/item/multisurgeon/examine(mob/user)
 	. = ..()
 	if(storedorgan)
 		. += span_info("Inside this multisurgeon is:")
 		for(var/obj/item/organ/implants in storedorgan)
-			. += span_info("-[implants.zone] [implants]")
+			. += span_info("-[implants] [implants.zone]")
 
 /obj/item/multisurgeon/attack_self(mob/user)//when the object it used...
 	if(!uses)
@@ -322,7 +326,7 @@
 				if(user.getorganslot(bastard.slot)) //NEVERMIND WE ARE NOT BALLING
 					bastard.zone = original_zone //MISSION ABORT
 					bastard.SetSlotFromZone()
-				bastard.update_icon()
+				bastard.update_appearance(UPDATE_ICON)
 		toimplant.Insert(user)//insert stored organ into the user
 	user.visible_message(span_notice("[user] presses a button on [src], and you hear a short mechanical noise."), span_notice("You feel a sharp sting as [src] plunges into your body."))
 	playsound(get_turf(user), 'sound/weapons/circsawhit.ogg', 50, 1)
@@ -338,6 +342,12 @@
 
 /obj/item/multisurgeon/noslipall //for traitors
 	starting_organ = list(/obj/item/organ/cyberimp/leg/noslip, /obj/item/organ/cyberimp/leg/noslip/l)
+
+/obj/item/multisurgeon/jumpboots //for admins
+	starting_organ = list(/obj/item/organ/cyberimp/leg/jumpboots, /obj/item/organ/cyberimp/leg/jumpboots/l)
+
+/obj/item/multisurgeon/wheelies //for admins
+	starting_organ = list(/obj/item/organ/cyberimp/leg/wheelies, /obj/item/organ/cyberimp/leg/wheelies/l)
 
 /obj/item/multisurgeon/magboots //for ce
 	desc = "A single-use multisurgeon that contains magboot implants for each leg."

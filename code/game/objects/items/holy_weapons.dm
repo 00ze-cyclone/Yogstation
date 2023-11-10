@@ -18,21 +18,22 @@
 	throwforce = 10
 	slot_flags = ITEM_SLOT_BELT
 	w_class = WEIGHT_CLASS_SMALL
-	obj_flags = UNIQUE_RENAME
+	obj_flags = UNIQUE_RENAME | UNIQUE_REDESC
 	wound_bonus = -10
 	cryo_preserve = TRUE
 	var/reskinned = FALSE
 	var/menutab = MENU_MISC //that way if someone forgets, it gets put in the tab that isn't specialized
 	var/chaplain_spawnable = TRUE
+	var/chaplain_bypass = FALSE //if people other than chaplain can select the rod
 
 	var/selected_category = MENU_ALL
 	var/list/show_categories = list(MENU_ALL, MENU_WEAPON, MENU_ARM, MENU_CLOTHING, MENU_MISC)
-	/// this text will show on the tgui menu when picking the nullrod form they want. should give a better idea of the nullrod's gimmick or quirks without giving away numbers 
+	/// this text will show on the tgui menu when picking the nullrod form they want. should give a better idea of the nullrod's gimmick or quirks without giving away numbers
 	var/additional_desc = "How are you seeing this? This is the default Nullrod bonus description. I makey a mistakey."
 
-/obj/item/nullrod/Initialize()
+/obj/item/nullrod/Initialize(mapload)
 	. = ..()
-	AddComponent(/datum/component/anti_magic, TRUE, TRUE, FALSE, null, null, FALSE)
+	AddComponent(/datum/component/anti_magic, MAGIC_RESISTANCE|MAGIC_RESISTANCE_HOLY)
 
 /obj/item/nullrod/suicide_act(mob/user)
 	user.visible_message(span_suicide("[user] is killing [user.p_them()]self with [src]! It looks like [user.p_theyre()] trying to get closer to god!"))
@@ -49,10 +50,6 @@
 		var/mob/living/carbon/human/H = user
 		H.dropItemToGround(src, TRUE, TRUE)
 	qdel(user, TRUE)
-	
-/obj/item/nullrod/attack_self(mob/user)
-	if(user?.mind?.holy_role && check_menu(user))
-		ui_interact(user)
 
 /obj/item/nullrod/proc/check_menu(mob/user)//check if the person is able to access the menu
 	if(!istype(user))
@@ -61,14 +58,16 @@
 		return FALSE
 	if(user.incapacitated() || !user.is_holding(src))
 		return FALSE
-	return TRUE
-	
+	if(chaplain_bypass || user?.mind?.holy_role)
+		return TRUE
+
 /obj/item/nullrod/ui_interact(mob/user, datum/tgui/ui)
-	ui = SStgui.try_update_ui(user, src, ui)
-	if(!ui)
-		ui = new(user, src, "NullRodMenu", name)
-		ui.open()
-	
+	if(check_menu(user))
+		ui = SStgui.try_update_ui(user, src, ui)
+		if(!ui)
+			ui = new(user, src, "NullRodMenu", name)
+			ui.open()
+
 /obj/item/nullrod/ui_static_data(mob/user)
 	var/list/data = list()
 	data["categories"] = list()
@@ -76,9 +75,9 @@
 	for(var/category in show_categories)
 		var/list/category_data = list()
 		category_data["name"] = category
-		
+
 		var/list/nullrods = list()
-		
+
 		for(var/shaft in subtypesof(/obj/item/nullrod))
 			var/obj/item/nullrod/rod = new shaft
 			if(!rod?.chaplain_spawnable)
@@ -89,19 +88,19 @@
 			details["menu_tab"] = rod.menutab
 			details["type_path"] = rod.type
 			details["additional_description"] = rod.additional_desc
-			
+
 			var/icon/rod_pic = getFlatIcon(rod)
 			var/md5 = md5(fcopy_rsc(rod_pic))
 			if(!SSassets.cache["photo_[md5]_[rod.name]_icon.png"])
 				SSassets.transport.register_asset("photo_[md5]_[rod.name]_icon.png", rod_pic)
 			SSassets.transport.send_assets(user, list("photo_[md5]_[rod.name]_icon.png" = rod_pic))
 			details["rod_pic"] = SSassets.transport.get_asset_url("photo_[md5]_[rod.name]_icon.png")
-			
+
 			if(category == MENU_ALL || category == rod.menutab)
 				nullrods += list(details)
-				
+
 			qdel(rod)
-		
+
 		category_data["nullrods"] = nullrods
 		data["categories"] += list(category_data)
 
@@ -212,7 +211,7 @@
 	menutab = MENU_WEAPON
 	additional_desc = "The cutting edge vibrates rapidly enabling it to cut cleanly through the unrighteous, no matter what armor or form they hide behind."
 
-/obj/item/nullrod/vibro/Initialize()
+/obj/item/nullrod/vibro/Initialize(mapload)
 	. = ..()
 	AddComponent(/datum/component/butchering, 70, 110) //the harvest gives a high bonus chance
 
@@ -336,8 +335,8 @@
 	hitsound = 'sound/weapons/chainhit.ogg'
 	menutab = MENU_WEAPON
 	additional_desc = "A holy weapon, capable at meting out righteousness from a distance."
-	
-/obj/item/nullrod/whip/Initialize()
+
+/obj/item/nullrod/whip/Initialize(mapload)
 	. = ..()
 	weapon_stats[REACH] = 4 //closest to a ranged weapon chaplain should ever get (that or maybe a throwing weapon)
 
@@ -389,48 +388,33 @@
 /obj/item/nullrod/tribal_knife/process()
 	slowdown = rand(-2, 2)
 
-/obj/item/nullrod/hammer //this doesn't actually get used, it's more of a visual to select the actual nullrod
+/obj/item/nullrod/hammer
 	name = "relic war hammer"
 	desc = "This war hammer cost the chaplain forty thousand space dollars."
 	icon = 'icons/obj/weapons/misc.dmi'
 	icon_state = "hammer"
 	item_state = "hammer"
+	base_icon_state = "hammer"
 	lefthand_file = 'icons/mob/inhands/weapons/hammers_lefthand.dmi'
 	righthand_file = 'icons/mob/inhands/weapons/hammers_righthand.dmi'
 	slot_flags = ITEM_SLOT_BACK
 	w_class = WEIGHT_CLASS_HUGE
 	attack_verb = list("smashed", "bashed", "hammered", "crunched")
+	sharpness = SHARP_NONE
 	menutab = MENU_WEAPON
 	additional_desc = "Bonk the sinners."
 
-/obj/item/nullrod/hammer/equipped(mob/user, slot, initial) //can't do it on initialize because it initializes before getting put in hands
+/obj/item/nullrod/hammer/Initialize(mapload)
 	. = ..()
-	var/obj/item/twohanded/required/nullrod/hammah = new /obj/item/twohanded/required/nullrod(src)
-	user.drop_all_held_items()
-	user.put_in_active_hand(hammah)
-	qdel(src)//lemme just delete the nullrod you just selected
+	AddComponent(/datum/component/two_handed, \
+		require_twohands = TRUE, \
+	)
 
-/obj/item/twohanded/required/nullrod
-	name = "relic war hammer"
-	desc = "This war hammer cost the chaplain forty thousand space dollars."
-	icon = 'icons/obj/weapons/misc.dmi'
-	icon_state = "hammer"
-	item_state = "hammer"
-	lefthand_file = 'icons/mob/inhands/weapons/hammers_lefthand.dmi'
-	righthand_file = 'icons/mob/inhands/weapons/hammers_righthand.dmi'
-	slot_flags = ITEM_SLOT_BACK
-	w_class = WEIGHT_CLASS_HUGE
-	force = 18 //it's not quite a baseball bat
-	attack_verb = list("smashed", "bashed", "hammered", "crunched", "clobbered")
-	sharpness = SHARP_NONE
-
-/obj/item/twohanded/required/nullrod/Initialize()
-	. = ..()
-	AddComponent(/datum/component/anti_magic, TRUE, TRUE, FALSE, null, null, FALSE) //trust me, this is better than re-coding two-handed weapons
-
-/obj/item/twohanded/required/nullrod/attack(mob/living/M, mob/living/user)//functions like a throw, but without the wallsplat
+/obj/item/nullrod/hammer/attack(mob/living/M, mob/living/user)//functions like a throw, but without the wallsplat
 	. = ..()
 	if(M == user)
+		return
+	if(!HAS_TRAIT(src, TRAIT_WIELDED))
 		return
 	var/atom/throw_target = get_edge_target_turf(M, user.dir)
 	ADD_TRAIT(M, TRAIT_IMPACTIMMUNE, "Nullrod Hammer")
@@ -439,7 +423,7 @@
 		distance = 50 //hehe funny hallway launch
 	M.throw_at(throw_target, distance, 3, user, TRUE, TRUE, callback = CALLBACK(src, PROC_REF(afterimpact), M))
 
-/obj/item/twohanded/required/nullrod/proc/afterimpact(mob/living/M)
+/obj/item/nullrod/hammer/proc/afterimpact(mob/living/M)
 	REMOVE_TRAIT(M, TRAIT_IMPACTIMMUNE, "Nullrod Hammer")
 
 /obj/item/nullrod/dualsword
@@ -497,7 +481,7 @@
 		user.balloon_alert(user, "you unsheathe \the [src].")
 		playsound(user, 'sound/items/unsheath.ogg', 25, TRUE)
 		swords = FALSE
-		update_icon()
+		update_appearance(UPDATE_ICON)
 
 /obj/item/nullrod/dualsword/attackby(obj/item/I, mob/living/user, params)
 	. = ..()
@@ -511,9 +495,9 @@
 
 		user.balloon_alert(user, "You sheathe \the [src].")
 		playsound(user, 'sound/items/sheath.ogg', 25, TRUE)
-		update_icon()
-		
-/obj/item/nullrod/dualsword/update_icon()
+		update_appearance(UPDATE_ICON)
+
+/obj/item/nullrod/dualsword/update_icon_state()
 	. = ..()
 	item_state = swords ? "fulldual" : "emptydual"
 	icon_state = item_state
@@ -555,7 +539,7 @@
 		return
 	user.swap_hand()
 	secondsword.attack(M, user, TRUE)
-	user.changeNext_move(CLICK_CD_MELEE)
+	user.changeNext_move(CLICK_CD_MELEE * 1.4)
 
 /obj/item/nullrod/handedsword/dropped(mob/user, silent = TRUE)
 	. = ..()
@@ -566,10 +550,10 @@
 			sheath.swordleft.forceMove(sheath)
 		if(!sheath.swords)
 			user.balloon_alert(user, "you sheathe \the [sheath].")
-			sheath.update_icon()
+			sheath.update_appearance(UPDATE_ICON)
 			playsound(user, 'sound/items/sheath.ogg', 25, TRUE)
 		sheath.swords = TRUE
-	
+
 
 /*---------------------------------------------------------------------------
 |
@@ -593,13 +577,13 @@
 	menutab = MENU_ARM
 	additional_desc = "Give up your hand to God and let it be the instrument of his will."
 
-/obj/item/nullrod/godhand/Initialize()
+/obj/item/nullrod/godhand/Initialize(mapload)
 	. = ..()
 	ADD_TRAIT(src, TRAIT_NODROP, HAND_REPLACEMENT_TRAIT)
 
 /obj/item/nullrod/godhand/ignition_effect(atom/A, mob/user)
 	. = span_notice("[user] grasps [A] with [user.p_their()] flaming hand, igniting it in a burst of holy flame. Holy hot damn, that is badass. ")
-	
+
 /obj/item/nullrod/chainsaw
 	name = "chainsaw hand"
 	desc = "Good? Bad? You're the guy with the chainsaw hand."
@@ -617,7 +601,7 @@
 	menutab = MENU_ARM
 	additional_desc = "Do you really need TWO arms? Consider one arm and a chainsaw arm."
 
-/obj/item/nullrod/chainsaw/Initialize()
+/obj/item/nullrod/chainsaw/Initialize(mapload)
 	. = ..()
 	ADD_TRAIT(src, TRAIT_NODROP, HAND_REPLACEMENT_TRAIT)
 	AddComponent(/datum/component/butchering, 30, 100, 0, hitsound)
@@ -640,7 +624,7 @@
 	menutab = MENU_ARM
 	additional_desc = "Channel all your sins into one arm and watch it twist and contort into an instrument of pure violence. Use it to protect the innocent as your penance."
 
-/obj/item/nullrod/armblade/Initialize()
+/obj/item/nullrod/armblade/Initialize(mapload)
 	. = ..()
 	ADD_TRAIT(src, TRAIT_NODROP, HAND_REPLACEMENT_TRAIT)
 	AddComponent(/datum/component/butchering, 80, 70)
@@ -669,9 +653,58 @@
 	throw_range = 7
 	throwforce = 30
 	sharpness = SHARP_EDGED
-	attack_verb = list("enlightened", "redpilled")
+	embedding = list("embed_chance" = 0)
+	attack_verb = list("enlightened", "redpilled", "m'lady'ed")
 	menutab = MENU_CLOTHING
 	additional_desc = "This gaudy hat has surprisingly good weight distribution, you could probably throw it very effectively."
+
+/obj/item/nullrod/tribal_knife/Initialize(mapload)
+	. = ..()
+	START_PROCESSING(SSobj, src)
+	AddComponent(/datum/component/butchering, 50, 100)
+
+/obj/item/nullrod/tribal_knife/Destroy()
+	STOP_PROCESSING(SSobj, src)
+	. = ..()
+
+/obj/item/nullrod/tribal_knife/process()
+	slowdown = rand(-2, 2)
+
+
+/obj/item/nullrod/pitchfork
+	icon = 'icons/obj/weapons/spears.dmi'
+	icon_state = "pitchfork0"
+	lefthand_file = 'icons/mob/inhands/weapons/polearms_lefthand.dmi'
+	righthand_file = 'icons/mob/inhands/weapons/polearms_righthand.dmi'
+	name = "unholy pitchfork"
+	w_class = WEIGHT_CLASS_NORMAL
+	desc = "Holding this makes you look absolutely devilish."
+	attack_verb = list("poked", "impaled", "pierced", "jabbed")
+	hitsound = 'sound/weapons/bladeslice.ogg'
+	sharpness = SHARP_POINTY
+
+/obj/item/nullrod/egyptian
+	name = "egyptian staff"
+	desc = "A tutorial in mummification is carved into the staff. You could probably craft the wraps if you had some cloth."
+	icon = 'icons/obj/guns/magic.dmi'
+	icon_state = "pharoah_sceptre"
+	item_state = "pharoah_sceptre"
+	lefthand_file = 'icons/mob/inhands/weapons/staves_lefthand.dmi'
+	righthand_file = 'icons/mob/inhands/weapons/staves_righthand.dmi'
+	w_class = WEIGHT_CLASS_NORMAL
+	attack_verb = list("bashes", "smacks", "whacks")
+
+/obj/item/nullrod/servoskull/equipped(mob/living/carbon/human/user, slot)
+	..()
+	if(hud_type && slot == ITEM_SLOT_EYES)
+		var/datum/atom_hud/H = GLOB.huds[hud_type]
+		H.show_to(user)
+
+/obj/item/nullrod/servoskull/dropped(mob/living/carbon/human/user)
+	..()
+	if(hud_type && istype(user) && user.glasses == src)
+		var/datum/atom_hud/H = GLOB.huds[hud_type]
+		H.hide_from(user)
 
 /obj/item/nullrod/servoskull
 	name = "servitor skull"
@@ -688,25 +721,25 @@
 	var/hud_type2 = DATA_HUD_MEDICAL_ADVANCED
 	menutab = MENU_CLOTHING
 	additional_desc = "This mysterious floating skull can communicate diagnostic reports to you regarding both mechanical and organic disciples around you."
-	
+
 /obj/item/nullrod/servoskull/equipped(mob/living/carbon/human/user, slot)
 	..()
-	if(hud_type && slot == SLOT_NECK)
+	if(hud_type && slot == ITEM_SLOT_NECK)
 		to_chat(user, "Sensory augmentation initiated")
 		var/datum/atom_hud/H = GLOB.huds[hud_type]
-		H.add_hud_to(user)
+		H.show_to(user)
 		var/datum/atom_hud/H2 = GLOB.huds[hud_type2]
-		H2.add_hud_to(user)
+		H2.show_to(user)
 
 /obj/item/nullrod/servoskull/dropped(mob/living/carbon/human/user)
 	..()
 	if(hud_type && istype(user) && user.wear_neck == src)
 		var/datum/atom_hud/H = GLOB.huds[hud_type]
-		H.remove_hud_from(user)
+		H.hide_from(user)
 		var/datum/atom_hud/H2 = GLOB.huds[hud_type2]
-		H2.remove_hud_from(user)
+		H2.hide_from(user)
 
-/obj/item/nullrod/hermes 
+/obj/item/nullrod/hermes
 	name = "fairy boots"
 	desc = "Boots blessed by the god Hermes. Some say that they were discarded after being tainted by fae magic."
 	gender = PLURAL //Carn: for grammarically correct text-parsing, but over here too
@@ -729,7 +762,7 @@
 
 /obj/item/nullrod/hermes/equipped(mob/user, slot, initial)
 	. = ..()
-	if(slot == SLOT_SHOES)
+	if(slot == ITEM_SLOT_FEET)
 		RegisterSignal(user, COMSIG_MOVABLE_PRE_MOVE, PROC_REF(move_react))
 
 /obj/item/nullrod/hermes/dropped(mob/user, silent)
@@ -751,7 +784,7 @@
 	icon_state = "quantum_sparks"
 	duration = 6
 
-/obj/effect/temp_visual/flowers/Initialize()
+/obj/effect/temp_visual/flowers/Initialize(mapload)
 	. = ..()
 	animate(src, alpha = 0, time = duration - 1)
 
@@ -880,7 +913,7 @@
 		return PROCESS_KILL // something has gone terribly wrong
 	if(!isliving(loc))
 		return PROCESS_KILL // something has gone terribly wrong
-	
+
 	var/notify = FALSE
 	if(COOLDOWN_FINISHED(src, holy_notification))
 		COOLDOWN_START(src, holy_notification, 0.8 SECONDS)
@@ -927,8 +960,8 @@
 	attack_verb = list("attacked", "slashed", "stabbed", "sliced", "torn", "ripped", "diced", "cut")
 	menutab = MENU_MISC
 	additional_desc = "This banana is comedically sharp."
-	
-/obj/item/nullrod/clown/Initialize()
+
+/obj/item/nullrod/clown/Initialize(mapload)
 	. = ..()
 	AddComponent(/datum/component/slippery, 40)
 
@@ -998,7 +1031,7 @@ it also swaps back if it gets thrown into the chaplain, but the chaplain catches
 	var/mob/living/simple_animal/shade/soul //when they're just a blade (stored inside the blade at all times)
 	var/mob/living/simple_animal/nullrod/blade //when they're flying around (blade stored inside them (soul is inside that blade))
 	var/mob/living/owner //the person with the recall spell
-	var/obj/effect/proc_holder/spell/targeted/recallnullrod/summon //the recall spell in question
+	var/datum/action/cooldown/spell/recall_nullrod/summon //the recall spell in question
 	menutab = MENU_MISC
 	additional_desc = "You feel an unwoken presence in this one."
 
@@ -1032,9 +1065,9 @@ it also swaps back if it gets thrown into the chaplain, but the chaplain catches
 			soul.fully_replace_character_name(null, "The spirit of [input]")
 
 		to_chat(owner, "You feel the spirit within the blade stir and waken.")
-		summon = new /obj/effect/proc_holder/spell/targeted/recallnullrod
+		summon = new(owner)
 		summon.sword = src
-		owner.AddSpell(summon)
+		summon.Grant(owner)
 	else
 		to_chat(user, "The blade is dormant. Maybe you can try again later.")
 		possessed = FALSE
@@ -1044,7 +1077,7 @@ it also swaps back if it gets thrown into the chaplain, but the chaplain catches
 	if(soul)
 		if(owner && summon)
 			to_chat(owner, "You feel weakened as your blade fades from this world.")
-			owner.RemoveSpell(summon)
+			summon.Remove(owner)
 		to_chat(soul, "You were destroyed!")
 		qdel(soul)
 	return ..()
@@ -1070,34 +1103,29 @@ it also swaps back if it gets thrown into the chaplain, but the chaplain catches
 		walking = TRUE
 	else
 		. = ..()
-	
-/obj/effect/proc_holder/spell/targeted/recallnullrod
+
+/datum/action/cooldown/spell/recall_nullrod
 	name = "Sword Recall"
 	desc = "Pulls your possessed sword back to you."
-	school = "transmutation"
 	panel = "Chaplain"
-	charge_max = 10 SECONDS
-	clothes_req = FALSE
-	antimagic_allowed = TRUE
+	button_icon = 'icons/mob/actions/actions_spells.dmi'
+	button_icon_state = "swordrecall"
+
+	school = SCHOOL_CONJURATION
 	invocation = "COME"
-	invocation_type = "shout"
-	range = -1
-	level_max = 0 //cannot be improved
-	cooldown_min = 10 SECONDS
-	include_user = TRUE
+	invocation_type = INVOCATION_SHOUT
 
+	cooldown_time = 10 SECONDS
+	spell_requirements = NONE
 	var/obj/item/nullrod/talking/sword
-	action_icon = 'icons/mob/actions/actions_spells.dmi'
-	action_icon_state = "swordrecall"
 
-/obj/effect/proc_holder/spell/targeted/recallnullrod/cast_check(skipcharge = 0, mob/user = usr)
-	if(sword.loc == user)
-		to_chat(user, span_notice("[sword] is already in your hand"))
-		revert_cast()
+/datum/action/cooldown/spell/recall_nullrod/before_cast(atom/cast_on)
+	if(sword.loc == cast_on)
+		to_chat(cast_on, span_notice("[sword] is already in your hand"))
 		return FALSE
 	return ..()
-	
-/obj/effect/proc_holder/spell/targeted/recallnullrod/cast(list/targets, mob/user)
+
+/datum/action/cooldown/spell/recall_nullrod/cast(mob/living/carbon/user)
 	if(sword)
 		if(sword.walking)
 			sword.blade.throw_at(user, 20, 3) //remember, sword is the item, blade is the mob
@@ -1115,10 +1143,10 @@ it also swaps back if it gets thrown into the chaplain, but the chaplain catches
 	real_name = "Shade"
 	desc = "A bound spirit."
 	gender = PLURAL
-	icon = 'icons/mob/mob.dmi'
+	icon = 'icons/mob/nonhuman-player/holy.dmi'
 	icon_state = "talking_sword"
 	icon_living = "talking_sword"
-	mob_biotypes = list(MOB_INORGANIC, MOB_SPIRIT)
+	mob_biotypes = MOB_INORGANIC|MOB_SPIRIT
 	maxHealth = 20
 	health = 20
 	speed = 0
@@ -1142,13 +1170,13 @@ it also swaps back if it gets thrown into the chaplain, but the chaplain catches
 	movement_type = FLYING
 	initial_language_holder = /datum/language_holder/universal
 	var/obj/item/nullrod/talking/sword //the sword they're part of
-	var/obj/effect/proc_holder/spell/targeted/nullroddrop/button //suicide button so they can return to being an item if need be
+	var/datum/action/cooldown/spell/nullrod_drop/button //suicide button so they can return to being an item if need be
 
-/mob/living/simple_animal/nullrod/Initialize()
+/mob/living/simple_animal/nullrod/Initialize(mapload)
 	. = ..()
-	AddComponent(/datum/component/anti_magic, TRUE, TRUE, FALSE, null, null, FALSE)
-	button = new /obj/effect/proc_holder/spell/targeted/nullroddrop
-	AddSpell(button)
+	AddComponent(/datum/component/anti_magic, MAGIC_RESISTANCE|MAGIC_RESISTANCE_HOLY)
+	button = new(src)
+	button.Grant(src)
 
 /mob/living/simple_animal/nullrod/death()
 	if(sword)
@@ -1159,54 +1187,162 @@ it also swaps back if it gets thrown into the chaplain, but the chaplain catches
 	qdel(src)
 
 /mob/living/simple_animal/nullrod/canSuicide()
-	return 0 //you're a sword, you can't suicide
+	return FALSE //you're a sword, you can't suicide
 
 /mob/living/simple_animal/nullrod/attack_hand(mob/living/carbon/human/M)
-	if(sword?.owner && M == sword.owner)//let the chaplain pick it up in one hit
-		sword.owner.put_in_active_hand(sword)
-		mind.transfer_to(sword.soul)
-		sword.walking = FALSE
-		visible_message("[sword.owner] grabs [src] by the hilt.")
-		qdel(src)
-	else
-		..()
+	if(!sword.owner || M != sword.owner)//let the chaplain pick it up in one hit
+		return ..()
+	sword.owner.put_in_active_hand(sword)
+	mind.transfer_to(sword.soul)
+	sword.walking = FALSE
+	visible_message("[sword.owner] grabs [src] by the hilt.")
+	qdel(src)
 
 /mob/living/simple_animal/nullrod/throw_impact(atom/hit_atom, datum/thrownthing/throwingdatum)
-	if(isliving(hit_atom))
-		var/mob/living/target = hit_atom
-		if(sword?.owner && target == sword.owner)
-			var/caught = sword.owner.put_in_hands(sword)
-			mind.transfer_to(sword.soul)
-			sword.walking = FALSE
-			qdel(src)
-			if(caught)
-				visible_message("[sword.owner] catches the flying blade out of the air!")
-			else
-				playsound(target, 'sound/weapons/rapierhit.ogg', 30, 1, -1)
-				sword.owner.take_overall_damage(5)
-				visible_message("The flying blade smacks [sword.owner] in the face as [sword.owner.p_they()] try to catch it with [sword.owner.p_their()] hands full!")
-	else
-		..()
+	if(!isliving(hit_atom))
+		return ..()
+	var/mob/living/target = hit_atom
+	if(sword?.owner && target == sword.owner)
+		var/caught = sword.owner.put_in_hands(sword)
+		mind.transfer_to(sword.soul)
+		sword.walking = FALSE
+		qdel(src)
+		if(caught)
+			visible_message("[sword.owner] catches the flying blade out of the air!")
+		else
+			playsound(target, 'sound/weapons/rapierhit.ogg', 30, 1, -1)
+			sword.owner.take_overall_damage(5)
+			visible_message("The flying blade smacks [sword.owner] in the face as [sword.owner.p_they()] try to catch it with [sword.owner.p_their()] hands full!")
 
-/obj/effect/proc_holder/spell/targeted/nullroddrop
+/datum/action/cooldown/spell/nullrod_drop
 	name = "land"
 	desc = "Return to the ground for people to wield you."
-	school = "transmutation"
 	panel = "Chaplain"
-	charge_max = 10 SECONDS
-	clothes_req = FALSE
-	antimagic_allowed = TRUE
-	range = -1
-	level_max = 0 //cannot be improved
-	cooldown_min = 10 SECONDS
-	include_user = TRUE
+	button_icon = 'icons/mob/actions/actions_spells.dmi'
+	button_icon_state = "sworddrop"
 
-	action_icon = 'icons/mob/actions/actions_spells.dmi'
-	action_icon_state = "sworddrop"
+	school = SCHOOL_TRANSMUTATION
+	invocation = "COME"
+	invocation_type = INVOCATION_SHOUT
 
-/obj/effect/proc_holder/spell/targeted/nullroddrop/cast(list/targets, mob/user)
+	cooldown_time = 10 SECONDS
+	spell_requirements = NONE
+
+/datum/action/cooldown/spell/nullrod_drop/cast(mob/living/user)
 	user.death()//basically a glorified suicide button PLEASE don't give it to any actual player
 	. = ..()
+
+/obj/item/nullrod/aspergillum //lol, lmao even
+	name = "aspergillum and aspersorium"
+	desc = "A weirdly named bucket and hand sprinkler."
+	icon = 'icons/obj/misc.dmi'
+	lefthand_file = 'icons/mob/inhands/misc/devices_lefthand.dmi'
+	righthand_file = 'icons/mob/inhands/misc/devices_righthand.dmi'
+	mob_overlay_icon = 'icons/mob/clothing/belt.dmi'
+	icon_state = "aspergillum0"
+	item_state = "aspergillum0"
+	base_icon_state = "aspergillum"
+	force = 0
+	w_class = WEIGHT_CLASS_BULKY
+	slot_flags = ITEM_SLOT_BELT
+	hitsound = 'sound/items/trayhit2.ogg'
+	menutab = MENU_MISC
+	additional_desc = "An everfilling bucket of holy water. A blessed hand held sprinkler."
+	var/splash_charges = 5
+	var/distance = 10
+	COOLDOWN_DECLARE(splashy)
+	COOLDOWN_DECLARE(balloon)
+
+/obj/item/nullrod/aspergillum/Initialize(mapload)
+	. = ..()
+	AddComponent(/datum/component/two_handed, \
+		wield_callback = CALLBACK(src, PROC_REF(on_wield)), \
+		unwield_callback = CALLBACK(src, PROC_REF(on_unwield)), \
+	)
+	
+/obj/item/nullrod/aspergillum/proc/on_wield(atom/source, mob/living/user)
+	playsound(src, 'sound/effects/slosh.ogg', 40, 1, -1)
+
+/obj/item/nullrod/aspergillum/proc/on_unwield(atom/source, mob/living/user)
+	playsound(src, 'sound/effects/splosh.ogg', 15, 1, -1)
+	splash_charges = initial(splash_charges)
+
+/obj/item/nullrod/aspergillum/afterattack(atom/target, mob/user, proximity_flag, click_parameters)
+	. = ..()
+	if(HAS_TRAIT(src, TRAIT_WIELDED))
+		if(target.loc == user)
+			return
+
+		if(splash_charges <= 0)
+			if(COOLDOWN_FINISHED(src, balloon))
+				user.balloon_alert(user, span_warning("The aspergillum is dry!"))
+				COOLDOWN_START(src, balloon, CLICK_CD_MELEE)
+			return
+
+		if(!COOLDOWN_FINISHED(src, splashy))
+			return
+		COOLDOWN_START(src, splashy, CLICK_CD_MELEE)
+
+		splash_charges--
+
+		playsound(src.loc, 'sound/effects/wounds/splatter.ogg', 50, 1, 3)
+		playsound(src.loc, get_sfx("collarbell"), 50, 1, 3)
+
+		var/direction = get_dir(src,target)
+
+		user.newtonian_move(turn(direction, 180))
+
+		//Get all the turfs that can be shot at
+		var/turf/T = get_turf(target)
+		var/turf/T1 = get_ranged_target_turf(target, direction, 1) //aim 1 tile past where you click
+		var/turf/T2 = get_step(T,turn(direction, 90))
+		var/turf/T3 = get_step(T,turn(direction, -90))
+		var/turf/T4 = get_step(get_turf(target),turn(direction, 90))
+		var/turf/T5 = get_step(get_turf(target),turn(direction, -90))
+		var/list/the_targets = list(T,T1,T2,T3,T4,T5)
+
+		var/list/water_particles=list()
+		for(var/a=0, a<6, a++)
+			var/obj/effect/particle_effect/water/W = new /obj/effect/particle_effect/water(get_turf(src))
+			W.life = distance
+			var/my_target = pick(the_targets)
+			water_particles[W] = my_target
+			the_targets -= my_target
+			var/datum/reagents/R = new/datum/reagents(1)
+			W.reagents = R
+			R.my_atom = W
+			W.reagents.add_reagent(/datum/reagent/water/holywater, 1)
+
+		//Make em move dat ass, hun
+		addtimer(CALLBACK(src, /obj/item/extinguisher/proc/move_particles, water_particles), 1)
+
+//Particle movement loop
+/obj/item/nullrod/aspergillum/proc/move_particles(list/particles, repetition=0)
+	//Check if there's anything in here first
+	if(!particles || particles.len == 0)
+		return
+	// Second loop: Get all the water particles and make them move to their target
+	for(var/obj/effect/particle_effect/water/W in particles)
+		var/turf/my_target = particles[W]
+		if(!W)
+			continue
+		step_towards(W,my_target)
+		if(!W.reagents)
+			continue
+		for(var/A in get_turf(W))
+			if(A == src.loc)//don't fill the chaplain with holy water
+				continue
+			W.reagents.reaction(A, TOUCH|VAPOR)
+		if(W.loc == my_target)
+			particles -= W
+	if(repetition < distance)
+		repetition++
+		addtimer(CALLBACK(src, /obj/item/extinguisher/proc/move_particles, particles, repetition), 1)
+
+/obj/item/nullrod/aspergillum/update_icon_state()
+	. = ..()
+	item_state = "[base_icon_state][HAS_TRAIT(src, TRAIT_WIELDED)]"
+	icon_state = "[base_icon_state][HAS_TRAIT(src, TRAIT_WIELDED)]"
 
 //never put anything below this, it deserves to be buried
 /obj/item/nullrod/sord
@@ -1237,6 +1373,10 @@ it also swaps back if it gets thrown into the chaplain, but the chaplain catches
 	slot_flags = ITEM_SLOT_BELT
 	attack_verb = list("sawed", "torn", "cut", "chopped", "diced")
 	hitsound = 'sound/weapons/chainsawhit.ogg'
+
+/obj/item/nullrod/unrestricted //anyone can select the nullrod, not just the chaplain
+	chaplain_bypass = TRUE
+	chaplain_spawnable = FALSE
 
 #undef MENU_WEAPON
 #undef MENU_ARM

@@ -175,13 +175,12 @@
 	icon_state = "petcollar"
 	var/tagname = null
 
-/obj/item/clothing/neck/petcollar/Initialize()
+/obj/item/clothing/neck/petcollar/Initialize(mapload)
 	.= ..()
 	AddComponent(/datum/component/squeak, list('sound/effects/collarbell1.ogg'=1,'sound/effects/collarbell2.ogg'=1), 50, 100, 2)
 
 /obj/item/clothing/neck/petcollar/mob_can_equip(mob/M, mob/equipper, slot, disable_warning = 0)
-	var/mob/living/carbon/C = M
-	if(C && !ishumanbasic(C))
+	if(ishuman(M))
 		return FALSE
 	return ..()
 
@@ -193,6 +192,44 @@
 	name = "post-modern scarf"
 	icon_state = "artist"
 	custom_price = 10
+
+/obj/item/clothing/neck/anti_magic_collar
+	name = "anti-magic collar"
+	desc = "A tight collar used on prisoners to restrict their use of magic, while leaving them vulnerable to it's effects"
+	icon_state = "antimagiccollar"
+	resistance_flags = FIRE_PROOF
+	var/inmate_name = "none"
+
+/obj/item/clothing/neck/anti_magic_collar/Initialize(mapload)
+	..()
+	GLOB.tracked_collars += src
+
+/obj/item/clothing/neck/anti_magic_collar/Destroy()
+	. = ..()
+	GLOB.tracked_collars -= src
+
+/obj/item/clothing/neck/anti_magic_collar/equipped(mob/user, slot, initial = FALSE)
+	. = ..()
+	if((slot & slot_flags))
+		to_chat(user, span_danger("You hear the collar click as it locks around your neck!"))
+		ADD_TRAIT(src, TRAIT_NODROP, CURSED_ITEM_TRAIT(type))
+		RegisterSignal(user, COMSIG_MOB_RESTRICT_MAGIC, PROC_REF(restrict_casting_magic))
+		inmate_name = user.name
+		return
+	
+/obj/item/clothing/neck/anti_magic_collar/dropped(mob/user)
+	. = ..()
+	UnregisterSignal(user, COMSIG_MOB_RESTRICT_MAGIC)
+	inmate_name = "none"
+
+///Prevents any magic from being used by the user.
+/obj/item/clothing/neck/anti_magic_collar/proc/restrict_casting_magic(mob/user, magic_flags)
+	SIGNAL_HANDLER
+	return COMPONENT_MAGIC_BLOCKED
+
+/obj/item/clothing/neck/anti_magic_collar/proc/unlock()
+	audible_message(span_danger("You hear a click, the collar unlocks!"))
+	REMOVE_TRAIT(src, TRAIT_NODROP, CURSED_ITEM_TRAIT(type))
 
 //////////////
 //DOPE BLING//
@@ -220,7 +257,7 @@
 	. = ..()
 	if(iscarbon(user))
 		var/mob/living/carbon/C = user
-		if(C.get_item_by_slot(SLOT_NECK) == src)
+		if(C.get_item_by_slot(ITEM_SLOT_NECK) == src)
 			to_chat(user, span_warning("You can't untie [src] while wearing it!"))
 			return
 		if(user.is_holding(src))
@@ -229,7 +266,7 @@
 			var/oldName = src.name
 			qdel(src)
 			user.put_in_hand(newBand, currentHandIndex)
-			user.visible_message("You untie [oldName] back into a [newBand.name]", "[user] unties [oldName] back into a [newBand.name]")
+			user.visible_message("[user] unties [oldName] back into a [newBand.name].", "You untie [oldName] back into a [newBand.name].")
 		else
 			to_chat(user, span_warning("You must be holding [src] in order to untie it!"))
 
@@ -349,6 +386,27 @@
 	w_class = WEIGHT_CLASS_SMALL
 	icon_state = "falcon"
 	item_state = "falcon"
+
+/obj/item/clothing/neck/falcon/secconwhistle
+	name = "constable's whistle"
+	desc = "A small cylindrical whistle meant for blowing out crooks' eardrums."
+	icon_state = "secconwhistle"
+	item_state = "secconwhistle"
+	COOLDOWN_DECLARE(recharge_time)
+	var/recharge_rate = 5 SECONDS
+	actions_types = list(/datum/action/item_action/blow_whistle)
+
+/obj/item/clothing/neck/falcon/secconwhistle/ui_action_click(mob/user)
+	if(!COOLDOWN_FINISHED(src, recharge_time))
+		user.balloon_alert(user, "Catch your breath first!")
+		return
+	playsound(get_turf(src), 'sound/misc/policewhistle.ogg', 30, TRUE, -1)
+	user.visible_message(span_warning("[user] blows their whistle!"))
+	COOLDOWN_START(src, recharge_time, recharge_rate)
+
+/datum/action/item_action/blow_whistle
+	name = "Blow Your Whistle"
+
 // Stealth cloaks
 
 /obj/item/clothing/neck/cloak/ranger
@@ -365,11 +423,13 @@
 	/// How much the cloak charges per process
 	var/cloak_charge_rate = 35
 	/// How much the cloak decreases when moving
-	var/cloak_move_loss = 5
+	var/cloak_move_loss = 7
 	/// How much the cloak decreases on a successful dodge
 	var/cloak_dodge_loss = 30
 
-/obj/item/clothing/neck/cloak/ranger/Initialize()
+	armor = list(MELEE = 0, BULLET = 0, LASER = 0, ENERGY = 0, BOMB = 0, BIO = 0, RAD = 0, FIRE = 75, ACID = 75)	//Resistant to the dangers of the natural world or something
+
+/obj/item/clothing/neck/cloak/ranger/Initialize(mapload)
 	. = ..()
 	RegisterSignal(src, COMSIG_ITEM_POST_UNEQUIP, PROC_REF(on_unequip))
 
@@ -382,10 +442,15 @@
 	update_signals()
 
 /obj/item/clothing/neck/cloak/ranger/proc/on_unequip(force, newloc, no_move, invdrop = TRUE, silent = FALSE)
+	current_user = null
 	update_signals()
 
+/obj/item/clothing/neck/cloak/ranger/Destroy()
+	set_cloak(0)
+	. = ..()
+
 /obj/item/clothing/neck/cloak/ranger/proc/update_signals(user)
-	if((!user || (current_user == user)) && current_user == loc && istype(current_user) && current_user.get_item_by_slot(SLOT_NECK) == src)
+	if((!user || (current_user == user)) && current_user == loc && istype(current_user) && current_user.get_item_by_slot(ITEM_SLOT_NECK) == src)
 		return TRUE
 
 	set_cloak(0)
@@ -394,7 +459,7 @@
 		UnregisterSignal(user, list(COMSIG_MOVABLE_MOVED, COMSIG_ATOM_BULLET_ACT))
 
 	var/mob/new_user = loc
-	if(istype(new_user) && new_user.get_item_by_slot(SLOT_NECK) == src)
+	if(istype(new_user) && new_user.get_item_by_slot(ITEM_SLOT_NECK) == src)
 		current_user = new_user
 		RegisterSignal(current_user, COMSIG_MOVABLE_MOVED, PROC_REF(on_move))
 		RegisterSignal(current_user, COMSIG_ATOM_BULLET_ACT, PROC_REF(on_projectile_hit))
@@ -412,13 +477,13 @@
 	if(!update_signals())
 		return
 	var/mob/user = loc
-	if(!istype(user) || !user.get_item_by_slot(SLOT_NECK) == src)
-		
+	if(!istype(user) || !user.get_item_by_slot(ITEM_SLOT_NECK) == src)
+
 		return
 	set_cloak(cloak + (cloak_charge_rate * delta_time))
 
 /obj/item/clothing/neck/cloak/ranger/hit_reaction(mob/living/carbon/human/owner, atom/movable/hitby, attack_text = "the attack", final_block_chance = 0, damage = 0, attack_type = MELEE_ATTACK)
-	if(dodge(owner, hitby, attack_text))
+	if(!isprojectile(hitby) && dodge(owner, hitby, attack_text))
 		return TRUE
 	return ..()
 
@@ -426,12 +491,13 @@
 	if(update_signals(user))
 		set_cloak(cloak - cloak_move_loss)
 
-/obj/item/clothing/neck/cloak/ranger/proc/on_projectile_hit(mob/living/carbon/human/user, obj/item/projectile/P, def_zone)
+/obj/item/clothing/neck/cloak/ranger/proc/on_projectile_hit(mob/living/carbon/human/user, obj/projectile/P, def_zone)
+	SIGNAL_HANDLER
 	if(dodge(user, P, "[P]"))
 		return BULLET_ACT_FORCE_PIERCE
 
 /obj/item/clothing/neck/cloak/ranger/proc/dodge(mob/living/carbon/human/user, atom/movable/hitby, attack_text)
-	if(!update_signals(user) || current_user.incapacitated(check_immobilized = TRUE) || !prob(cloak))
+	if(!update_signals(user) || current_user.incapacitated() || !prob(cloak))
 		return FALSE
 
 	set_cloak(cloak - cloak_dodge_loss)
@@ -445,6 +511,7 @@
 	desc = "A dark red cape that uses advanced chameleon technology to make the wearer nearly invisible and aid them in dodging projectiles. Unable to sustain its image under distress or EMP."
 	icon_state = "syndie_cloak"
 	max_cloak = 75 //Max 75% dodge is a little quirky
+	cloak_move_loss = 5
 	cloak_charge_rate = 20
 	cloak_dodge_loss = 40
 	var/cloak_emp_disable_duration = 10 SECONDS

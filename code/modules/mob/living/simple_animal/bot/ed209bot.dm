@@ -39,12 +39,10 @@
 	var/weaponscheck = TRUE //If true, arrest people for weapons if they don't have access
 	var/check_records = TRUE //Does it check security records?
 	var/arrest_type = FALSE //If true, don't handcuff
-	var/projectile = /obj/item/projectile/energy/electrode //Holder for projectile type
+	var/projectile = /obj/projectile/energy/electrode //Holder for projectile type
 	var/shoot_sound = 'sound/weapons/taser.ogg'
 	var/cell_type = /obj/item/stock_parts/cell
 	var/vest_type = /obj/item/clothing/suit/armor/vest
-
-	do_footstep = TRUE
 
 
 /mob/living/simple_animal/bot/ed209/Initialize(mapload,created_name,created_lasercolor)
@@ -73,7 +71,7 @@
 
 	//SECHUD
 	var/datum/atom_hud/secsensor = GLOB.huds[DATA_HUD_SECURITY_ADVANCED]
-	secsensor.add_hud_to(src)
+	secsensor.show_to(src)
 
 /mob/living/simple_animal/bot/ed209/turn_on()
 	. = ..()
@@ -194,8 +192,8 @@ Auto Patrol[]"},
 			if(lasercolor)//To make up for the fact that lasertag bots don't hunt
 				shootAt(user)
 
-/mob/living/simple_animal/bot/ed209/emag_act(mob/user)
-	..()
+/mob/living/simple_animal/bot/ed209/emag_act(mob/user, obj/item/card/emag/emag_card)
+	. = ..()
 	if(emagged == 2)
 		if(user)
 			to_chat(user, span_warning("You short out [src]'s target assessment circuits."))
@@ -205,8 +203,8 @@ Auto Patrol[]"},
 		icon_state = "[lasercolor]ed209[on]"
 		set_weapon()
 
-/mob/living/simple_animal/bot/ed209/bullet_act(obj/item/projectile/Proj)
-	if(istype(Proj , /obj/item/projectile/beam/laser)||istype(Proj, /obj/item/projectile/bullet))
+/mob/living/simple_animal/bot/ed209/bullet_act(obj/projectile/Proj)
+	if(istype(Proj , /obj/projectile/beam/laser)||istype(Proj, /obj/projectile/bullet))
 		if((Proj.damage_type == BURN) || (Proj.damage_type == BRUTE))
 			if(!Proj.nodamage && Proj.damage < src.health && ishuman(Proj.firer))
 				retaliate(Proj.firer)
@@ -368,7 +366,7 @@ Auto Patrol[]"},
 		else
 			continue
 
-/mob/living/simple_animal/bot/ed209/proc/check_for_weapons(var/obj/item/slot_item)
+/mob/living/simple_animal/bot/ed209/proc/check_for_weapons(obj/item/slot_item)
 	if(slot_item && (slot_item.item_flags & NEEDS_PERMIT))
 		return 1
 	return 0
@@ -388,15 +386,15 @@ Auto Patrol[]"},
 	if(!lasercolor)
 		var/obj/item/gun/energy/e_gun/dragnet/G = new (Tsec)
 		G.cell.charge = 0
-		G.update_icon()
+		G.update_appearance(UPDATE_ICON)
 	else if(lasercolor == "b")
 		var/obj/item/gun/energy/laser/bluetag/G = new (Tsec)
 		G.cell.charge = 0
-		G.update_icon()
+		G.update_appearance(UPDATE_ICON)
 	else if(lasercolor == "r")
 		var/obj/item/gun/energy/laser/redtag/G = new (Tsec)
 		G.cell.charge = 0
-		G.update_icon()
+		G.update_appearance(UPDATE_ICON)
 
 	if(prob(50))
 		new /obj/item/bodypart/l_leg/robot(Tsec)
@@ -422,17 +420,17 @@ Auto Patrol[]"},
 	shoot_sound = 'sound/weapons/laser.ogg'
 	if(emagged == 2)
 		if(lasercolor)
-			projectile = /obj/item/projectile/beam/lasertag
+			projectile = /obj/projectile/beam/lasertag
 		else
-			projectile = /obj/item/projectile/beam
+			projectile = /obj/projectile/beam
 	else
 		if(!lasercolor)
 			shoot_sound = 'sound/weapons/laser.ogg'
-			projectile = /obj/item/projectile/energy/trap
+			projectile = /obj/projectile/energy/trap
 		else if(lasercolor == "b")
-			projectile = /obj/item/projectile/beam/lasertag/bluetag
+			projectile = /obj/projectile/beam/lasertag/bluetag
 		else if(lasercolor == "r")
-			projectile = /obj/item/projectile/beam/lasertag/redtag
+			projectile = /obj/projectile/beam/lasertag/redtag
 
 /mob/living/simple_animal/bot/ed209/proc/shootAt(mob/target)
 	if(world.time <= lastfired + shot_delay)
@@ -448,7 +446,7 @@ Auto Patrol[]"},
 	if(!projectile)
 		return
 
-	var/obj/item/projectile/A = new projectile (loc)
+	var/obj/projectile/A = new projectile (loc)
 	playsound(src, shoot_sound, 50, TRUE)
 	A.preparePixelProjectile(target, src)
 	A.fire()
@@ -494,14 +492,14 @@ Auto Patrol[]"},
 						mode = BOT_HUNT
 
 
-/mob/living/simple_animal/bot/ed209/bullet_act(obj/item/projectile/Proj)
+/mob/living/simple_animal/bot/ed209/bullet_act(obj/projectile/Proj)
 	if(!disabled)
 		var/lasertag_check = 0
 		if((lasercolor == "b"))
-			if(istype(Proj, /obj/item/projectile/beam/lasertag/redtag))
+			if(istype(Proj, /obj/projectile/beam/lasertag/redtag))
 				lasertag_check++
 		else if((lasercolor == "r"))
-			if(istype(Proj, /obj/item/projectile/beam/lasertag/bluetag))
+			if(istype(Proj, /obj/projectile/beam/lasertag/bluetag))
 				lasertag_check++
 		if(lasertag_check)
 			icon_state = "[lasercolor]ed2090"
@@ -545,8 +543,8 @@ Auto Patrol[]"},
 	spawn(2)
 		icon_state = "[lasercolor]ed209[on]"
 	var/threat = 5
-	C.Paralyze(100)
-	C.stuttering = 5
+	C.Paralyze(10 SECONDS)
+	C.adjust_stutter(5 SECONDS)
 	if(ishuman(C))
 		var/mob/living/carbon/human/H = C
 		var/judgement_criteria = judgement_criteria()
@@ -568,6 +566,6 @@ Auto Patrol[]"},
 		if( !on || !Adjacent(C) || !isturf(C.loc) ) //if he's in a closet or not adjacent, we cancel cuffing.
 			return
 		if(!C.handcuffed)
-			C.handcuffed = new /obj/item/restraints/handcuffs/cable/zipties/used(C)
+			C.set_handcuffed(new /obj/item/restraints/handcuffs/cable/zipties/used(C))
 			C.update_handcuffed()
 			back_to_idle()

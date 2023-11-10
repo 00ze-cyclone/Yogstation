@@ -47,7 +47,7 @@ GLOBAL_VAR_INIT(floor_cluwnes, 0)
 	hud_possible = list(ANTAG_HUD)
 
 
-/mob/living/simple_animal/hostile/floor_cluwne/Initialize()
+/mob/living/simple_animal/hostile/floor_cluwne/Initialize(mapload)
 	. = ..()
 	access_card = new /obj/item/card/id(src)
 	access_card.access = get_all_accesses()//THERE IS NO ESCAPE
@@ -79,7 +79,7 @@ GLOBAL_VAR_INIT(floor_cluwnes, 0)
 	return TRUE
 
 
-/mob/living/simple_animal/hostile/floor_cluwne/Life()
+/mob/living/simple_animal/hostile/floor_cluwne/Life(seconds_per_tick = SSMOBS_DT, times_fired)
 	do_jitter_animation(1000)
 	pixel_y = 8
 	var/area/A = get_area(loc) // Has to be separated from the below since is_type_in_typecache is also a funky macro
@@ -151,7 +151,7 @@ GLOBAL_VAR_INIT(floor_cluwnes, 0)
 	return
 
 
-/mob/living/simple_animal/hostile/floor_cluwne/electrocute_act(shock_damage, obj/source, siemens_coeff = 1, safety = 0, tesla_shock = 0, illusion = 0, stun = TRUE)//prevents runtimes with machine fuckery
+/mob/living/simple_animal/hostile/floor_cluwne/electrocute_act(shock_damage, obj/source, siemens_coeff = 1, safety = 0, tesla_shock = 0, illusion = 0, stun = TRUE, gib = FALSE)//prevents runtimes with machine fuckery
 	return FALSE
 
 /mob/living/simple_animal/hostile/floor_cluwne/proc/Found_You()
@@ -441,7 +441,7 @@ GLOBAL_VAR_INIT(floor_cluwnes, 0)
 	duration = 600
 	randomdir = FALSE
 
-/obj/effect/temp_visual/fcluwne_manifest/Initialize()
+/obj/effect/temp_visual/fcluwne_manifest/Initialize(mapload)
 	. = ..()
 	playsound(src, 'yogstation/sound/misc/floor_cluwne_emerge.ogg', 100, 1)
 	flick("fcluwne_manifest",src)
@@ -450,7 +450,7 @@ GLOBAL_VAR_INIT(floor_cluwnes, 0)
 	name = "floor cluwne"
 	desc = "If you have this, tell a coder or admin!"
 
-/obj/effect/dummy/floorcluwne_orbit/Initialize()
+/obj/effect/dummy/floorcluwne_orbit/Initialize(mapload)
 	. = ..()
 	GLOB.floor_cluwnes++
 	name += " ([GLOB.floor_cluwnes])"

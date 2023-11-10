@@ -39,11 +39,11 @@
 	msg += span_notice("My mental status: ") //Long term
 	switch(sanity)
 		if(SANITY_GREAT to INFINITY)
-			msg += "<span class='nicegreen'>My mind feels like a temple!<span>\n"
+			msg += "[span_nicegreen("My mind feels like a temple!")]\n"
 		if(SANITY_NEUTRAL to SANITY_GREAT)
-			msg += "<span class='nicegreen'>I have been feeling great lately!<span>\n"
+			msg += "[span_nicegreen("I have been feeling great lately!")]\n"
 		if(SANITY_DISTURBED to SANITY_NEUTRAL)
-			msg += "<span class='nicegreen'>I have felt quite decent lately.<span>\n"
+			msg += "[span_nicegreen("I have felt quite decent lately.")]\n"
 		if(SANITY_UNSTABLE to SANITY_DISTURBED)
 			msg += "[span_warning("I'm feeling a little bit unhinged...")]\n"
 		if(SANITY_CRAZY to SANITY_UNSTABLE)
@@ -54,23 +54,23 @@
 	msg += span_notice("My current mood: ") //Short term
 	switch(mood_level)
 		if(1)
-			msg += "<span class='boldwarning'>I wish I was dead!<span>\n"
+			msg += "[span_boldwarning("I wish I was dead!")]\n"
 		if(2)
-			msg += "<span class='boldwarning'>I feel terrible...<span>\n"
+			msg += "[span_boldwarning("I feel terrible...")]\n"
 		if(3)
-			msg += "<span class='boldwarning'>I feel very upset.<span>\n"
+			msg += "[span_boldwarning("I feel very upset.")]\n"
 		if(4)
-			msg += "<span class='boldwarning'>I'm a bit sad.<span>\n"
+			msg += "[span_boldwarning("I'm a bit sad.")]\n"
 		if(5)
-			msg += "<span class='nicegreen'>I'm alright.<span>\n"
+			msg += "[span_nicegreen("I'm alright.")]\n"
 		if(6)
-			msg += "<span class='nicegreen'>I feel pretty okay.<span>\n"
+			msg += "[span_nicegreen("I feel pretty okay.")]\n"
 		if(7)
-			msg += "<span class='nicegreen'>I feel pretty good.<span>\n"
+			msg += "[span_nicegreen("I feel pretty good.")]\n"
 		if(8)
-			msg += "<span class='nicegreen'>I feel amazing!<span>\n"
+			msg += "[span_nicegreen("I feel amazing!")]\n"
 		if(9)
-			msg += "<span class='nicegreen'>I love life!<span>\n"
+			msg += "[span_nicegreen("I love life!")]\n"
 
 	msg += span_notice("Moodlets:\n")//All moodlets
 	if(mood_events.len)
@@ -78,7 +78,7 @@
 			var/datum/mood_event/event = mood_events[i]
 			msg += event.description
 	else
-		msg += "<span class='nicegreen'>I don't have much of a reaction to anything right now.<span>\n"
+		msg += "[span_nicegreen("I don't have much of a reaction to anything right now.")]\n"
 	to_chat(user || parent, examine_block(msg))
 
 /datum/component/mood/proc/update_mood() //Called whenever a mood event is added or removed
@@ -139,9 +139,14 @@
 				highest_absolute_mood = absmood
 
 	if(!conflicting_moodies.len) //no special icons- go to the normal icon states
+		var/datum/antagonist/bloodsucker/bloodsuckerdatum = owner.mind.has_antag_datum(/datum/antagonist/bloodsucker) //bloodsucker edit
 		if(sanity < 25)
 			screen_obj.icon_state = "mood_insane"
+			if(IS_BLOODSUCKER(owner) && bloodsuckerdatum.my_clan?.get_clan() == CLAN_TOREADOR)
+				screen_obj.add_overlay("teeth_insane")
 		else
+			if(IS_BLOODSUCKER(owner) && bloodsuckerdatum.my_clan?.get_clan() == CLAN_TOREADOR)
+				screen_obj.add_overlay("teeth[mood_level]")
 			screen_obj.icon_state = "mood[mood_level]"
 		screen_obj_sanity.icon_state = "sanity[sanity_level]"
 		return
@@ -273,6 +278,8 @@
 				addtimer(CALLBACK(src, PROC_REF(clear_event), null, category), the_event.timeout, TIMER_UNIQUE|TIMER_OVERRIDE)
 			return 0 //Don't have to update the event.
 	the_event = new type(src, param)
+	if(QDELETED(the_event)) // The mood event has been deleted for whatever reason (requires a job, etc).
+		return
 
 	mood_events[category] = the_event
 	the_event.category = category
@@ -290,7 +297,7 @@
 	qdel(event)
 	update_mood()
 
-/datum/component/mood/proc/remove_temp_moods(var/admin) //Removes all temp moods
+/datum/component/mood/proc/remove_temp_moods(admin) //Removes all temp moods
 	for(var/i in mood_events)
 		var/datum/mood_event/moodlet = mood_events[i]
 		if(!moodlet || !moodlet.timeout)
@@ -328,12 +335,10 @@
 	print_mood(user)
 
 /datum/component/mood/proc/HandleNutrition(mob/living/L)
-	if(ishuman(L))
-		var/mob/living/carbon/human/H = L
-		if(isethereal(H))
-			HandleCharge(H)
-		if(HAS_TRAIT(H, TRAIT_NOHUNGER))
-			return FALSE //no mood events for nutrition
+	if(HAS_TRAIT(L, TRAIT_NOHUNGER))
+		return FALSE //no mood events for nutrition
+	if(HAS_TRAIT(L, TRAIT_POWERHUNGRY))
+		return HandleCharge(L)
 	switch(L.nutrition)
 		if(NUTRITION_LEVEL_FULL to INFINITY)
 			if (!HAS_TRAIT(L, TRAIT_VORACIOUS))
@@ -351,21 +356,22 @@
 		if(0 to NUTRITION_LEVEL_STARVING)
 			add_event(null, "nutrition", /datum/mood_event/starving)
 
-/datum/component/mood/proc/HandleCharge(mob/living/carbon/human/H)
-	var/datum/species/ethereal/E = H.dna?.species
-	switch(E.get_charge(H))
-		if(ETHEREAL_CHARGE_NONE to ETHEREAL_CHARGE_LOWPOWER)
-			add_event(null, "charge", /datum/mood_event/decharged)
-		if(ETHEREAL_CHARGE_LOWPOWER to ETHEREAL_CHARGE_NORMAL)
-			add_event(null, "charge", /datum/mood_event/lowpower)
-		if(ETHEREAL_CHARGE_NORMAL to ETHEREAL_CHARGE_ALMOSTFULL)
-			clear_event(null, "charge")
-		if(ETHEREAL_CHARGE_ALMOSTFULL to ETHEREAL_CHARGE_FULL)
-			add_event(null, "charge", /datum/mood_event/charged)
-		if(ETHEREAL_CHARGE_FULL to ETHEREAL_CHARGE_OVERLOAD)
-			add_event(null, "charge", /datum/mood_event/overcharged)
-		if(ETHEREAL_CHARGE_OVERLOAD to ETHEREAL_CHARGE_DANGEROUS)
-			add_event(null, "charge", /datum/mood_event/supercharged)
+/datum/component/mood/proc/HandleCharge(mob/living/L)
+	if(isethereal(L) && L.nutrition > NUTRITION_LEVEL_MOSTLY_FULL)
+		if(L.nutrition > NUTRITION_LEVEL_FULL)
+			add_event(null, "nutrition", /datum/mood_event/supercharged)
+		else
+			add_event(null, "nutrition", /datum/mood_event/overcharged)
+		return
+	switch(L.nutrition)
+		if(0 to NUTRITION_LEVEL_STARVING)
+			add_event(null, "nutrition", /datum/mood_event/decharged)
+		if(NUTRITION_LEVEL_STARVING to NUTRITION_LEVEL_HUNGRY)
+			add_event(null, "nutrition", /datum/mood_event/lowpower)
+		if(NUTRITION_LEVEL_HUNGRY to NUTRITION_LEVEL_FED)
+			clear_event(null, "nutrition")
+		if(NUTRITION_LEVEL_FED to INFINITY)
+			add_event(null, "nutrition", /datum/mood_event/charged)
 
 /datum/component/mood/proc/check_area_mood(datum/source, area/A)
 	if(A.mood_bonus)

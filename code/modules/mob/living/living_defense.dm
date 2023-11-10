@@ -48,16 +48,16 @@
 /mob/living/proc/is_eyes_covered(check_glasses = 1, check_head = 1, check_mask = 1)
 	return FALSE
 
-/mob/living/proc/on_hit(obj/item/projectile/P)
+/mob/living/proc/on_hit(obj/projectile/P)
 	return BULLET_ACT_HIT
 
-/mob/living/bullet_act(obj/item/projectile/P, def_zone)
-	var/armor = run_armor_check(def_zone, P.flag, "","",P.armour_penetration)
+/mob/living/bullet_act(obj/projectile/P, def_zone)
+	var/armor = run_armor_check(def_zone, P.armor_flag, "","",P.armour_penetration)
 
 	// "Projectiles now ignore the holopara's master or any of their other holoparas."
 	var/guardian_pass = FALSE
-	if(istype(P, /obj/item/projectile/guardian))
-		var/obj/item/projectile/guardian/G = P
+	if(istype(P, /obj/projectile/guardian))
+		var/obj/projectile/guardian/G = P
 		var/datum/mind/guardian_master = G.guardian_master
 		if(guardian_master?.current)
 			var/list/safe = list(guardian_master.current)
@@ -72,11 +72,11 @@
 	
 	if(!P.nodamage)
 		last_damage = P.name
-		if((istype(P, /obj/item/projectile/energy/nuclear_particle)) && (getarmor(null, RAD) >= 100))
+		if((istype(P, /obj/projectile/energy/nuclear_particle)) && (getarmor(null, RAD) >= 100))
 			P.damage = 0
 		else
 			var/attack_direction = get_dir(P.starting, src)
-			apply_damage(P.damage, P.damage_type, def_zone, armor, wound_bonus = P.wound_bonus, bare_wound_bonus = P.bare_wound_bonus, sharpness = P.get_sharpness(), attack_direction = attack_direction)
+			apply_damage(P.damage, P.damage_type, def_zone, armor, wound_bonus = P.wound_bonus, bare_wound_bonus = P.bare_wound_bonus, sharpness = P.sharpness, attack_direction = attack_direction)
 		if(P.dismemberment)
 			check_projectile_dismemberment(P, def_zone)
 	if(P.penetrating && (P.penetration_type == 0 || P.penetration_type == 2) && P.penetrations > 0)
@@ -84,7 +84,7 @@
 		return P.on_hit(src, armor) && BULLET_ACT_FORCE_PIERCE
 	return P.on_hit(src, armor)? BULLET_ACT_HIT : BULLET_ACT_BLOCK
 
-/mob/living/proc/check_projectile_dismemberment(obj/item/projectile/P, def_zone)
+/mob/living/proc/check_projectile_dismemberment(obj/projectile/P, def_zone)
 	return 0
 
 /obj/item/proc/get_volume_by_throwforce_and_or_w_class()
@@ -155,7 +155,7 @@
 /mob/living/fire_act()
 	last_damage = "fire"
 	adjust_fire_stacks(3)
-	IgniteMob()
+	ignite_mob()
 
 /mob/living/proc/grabbedby(mob/living/carbon/user, supress_message = FALSE)
 	if(user == src || anchored || !isturf(user.loc))
@@ -175,63 +175,64 @@
 
 //proc to upgrade a simple pull into a more aggressive grab.
 /mob/living/proc/grippedby(mob/living/carbon/user, instant = FALSE)
-	if(user.grab_state < GRAB_KILL)
-		user.changeNext_move(CLICK_CD_GRABBING)
-		var/sound_to_play = 'sound/weapons/thudswoosh.ogg'
-		if(ishuman(user))
-			var/mob/living/carbon/human/H = user
-			if(H.dna.species.grab_sound)
-				sound_to_play = H.dna.species.grab_sound
-		playsound(src.loc, sound_to_play, 50, 1, -1)
+	if(user.grab_state >= user.max_grab)
+		return
+	user.changeNext_move(CLICK_CD_GRABBING)
+	var/sound_to_play = 'sound/weapons/thudswoosh.ogg'
+	if(ishuman(user))
+		var/mob/living/carbon/human/H = user
+		if(H.dna.species.grab_sound)
+			sound_to_play = H.dna.species.grab_sound
+	playsound(src.loc, sound_to_play, 50, TRUE, -1)
 
-		if(user.grab_state) //only the first upgrade is instantaneous
-			var/old_grab_state = user.grab_state
-			var/grab_upgrade_time = instant ? 0 : 30
-			visible_message(span_danger("[user] starts to tighten [user.p_their()] grip on [src]!"), \
-				span_userdanger("[user] starts to tighten [user.p_their()] grip on you!"))
-			switch(user.grab_state)
-				if(GRAB_AGGRESSIVE)
-					log_combat(user, src, "attempted to neck grab", addition="neck grab")
-				if(GRAB_NECK)
-					log_combat(user, src, "attempted to strangle", addition="kill grab")
-			if(!do_mob(user, src, grab_upgrade_time))
-				return FALSE
-			if(!user.pulling || user.pulling != src || user.grab_state != old_grab_state)
-				return FALSE
-			if(user.a_intent != INTENT_GRAB)
-				to_chat(user, "<span class='notice'>You must be on grab intent to upgrade your grab further!<span>")
-				return FALSE
-		user.grab_state++
+	if(user.grab_state) //only the first upgrade is instantaneous
+		var/old_grab_state = user.grab_state
+		var/grab_upgrade_time = instant ? 0 : 30
+		visible_message(span_danger("[user] starts to tighten [user.p_their()] grip on [src]!"), \
+			span_userdanger("[user] starts to tighten [user.p_their()] grip on you!"))
 		switch(user.grab_state)
 			if(GRAB_AGGRESSIVE)
-				var/add_log = ""
-				if(HAS_TRAIT(user, TRAIT_PACIFISM))
-					visible_message(span_danger("[user] has firmly gripped [src]!"),
-						span_danger("[user] has firmly gripped you!"))
-					add_log = " (pacifist)"
-				else
-					visible_message(span_danger("[user] has grabbed [src] aggressively!"), \
-									span_userdanger("[user] has grabbed you aggressively!"))
-					drop_all_held_items()
-				stop_pulling()
-				log_combat(user, src, "grabbed", addition="aggressive grab[add_log]")
+				log_combat(user, src, "attempted to neck grab", addition="neck grab")
 			if(GRAB_NECK)
-				log_combat(user, src, "grabbed", addition="neck grab")
-				visible_message(span_danger("[user] has grabbed [src] by the neck!"),\
-								span_userdanger("[user] has grabbed you by the neck!"))
-				update_mobility() //we fall down
-				if(!buckled && !density)
-					Move(user.loc)
-			if(GRAB_KILL)
-				last_damage = "grip marks on the neck"
-				log_combat(user, src, "strangled", addition="kill grab")
-				visible_message(span_danger("[user] is strangling [src]!"), \
-								span_userdanger("[user] is strangling you!"))
-				update_mobility() //we fall down
-				if(!buckled && !density)
-					Move(user.loc)
-		user.set_pull_offsets(src, grab_state)
-		return TRUE
+				log_combat(user, src, "attempted to strangle", addition="kill grab")
+		if(!do_after(user, grab_upgrade_time, src))
+			return FALSE
+		if(!user.pulling || user.pulling != src || user.grab_state != old_grab_state)
+			return FALSE
+		if(user.a_intent != INTENT_GRAB)
+			to_chat(user, span_notice("You must be on grab intent to upgrade your grab further!"))
+			return FALSE
+	user.setGrabState(user.grab_state + 1)
+	switch(user.grab_state)
+		if(GRAB_AGGRESSIVE)
+			var/add_log = ""
+			if(HAS_TRAIT(user, TRAIT_PACIFISM))
+				visible_message(span_danger("[user] has firmly gripped [src]!"),
+					span_danger("[user] has firmly gripped you!"))
+				add_log = " (pacifist)"
+			else
+				visible_message(span_danger("[user] has grabbed [src] aggressively!"), \
+								span_userdanger("[user] has grabbed you aggressively!"))
+			stop_pulling()
+			log_combat(user, src, "grabbed", addition="aggressive grab[add_log]")
+		if(GRAB_NECK)
+			log_combat(user, src, "grabbed", addition="neck grab")
+			visible_message(span_danger("[user] grabs [src] by the neck!"),\
+							span_userdanger("[user] grabs you by the neck!"), span_hear("You hear aggressive shuffling!"), null, user)
+			to_chat(user, span_danger("You grab [src] by the neck!"))
+			update_mobility() //we fall down
+			if(!buckled && !density)
+				Move(user.loc)
+		if(GRAB_KILL)
+			last_damage = "grip marks on the neck"
+			log_combat(user, src, "strangled", addition="kill grab")
+			visible_message(span_danger("[user] is strangling [src]!"), \
+							span_userdanger("[user] is strangling you!"))
+			update_mobility() //we fall down
+			if(!buckled && !density)
+				Move(user.loc)
+	user.set_pull_offsets(src, grab_state)
+	return TRUE
 
 
 /mob/living/attack_slime(mob/living/simple_animal/slime/M)
@@ -359,7 +360,7 @@
 	take_bodypart_damage(acidpwr * min(1, acid_volume * 0.1))
 	return 1
 
-/mob/living/proc/electrocute_act(shock_damage, obj/source, siemens_coeff = 1, safety = 0, tesla_shock = 0, illusion = 0, stun = TRUE)
+/mob/living/proc/electrocute_act(shock_damage, obj/source, siemens_coeff = 1, safety = 0, tesla_shock = 0, illusion = 0, stun = TRUE, gib = FALSE)
 	SEND_SIGNAL(src, COMSIG_LIVING_ELECTROCUTE_ACT, shock_damage)
 	if(tesla_shock && (flags_1 & TESLA_IGNORE_1))
 		return FALSE
@@ -405,8 +406,8 @@
 		if((GLOB.cult_narsie.souls == GLOB.cult_narsie.soul_goal) && (GLOB.cult_narsie.resolved == FALSE))
 			GLOB.cult_narsie.resolved = TRUE
 			sound_to_playing_players('sound/machines/alarm.ogg')
-			addtimer(CALLBACK(GLOBAL_PROC, PROC_REF(cult_ending_helper), 1), 120)
-			addtimer(CALLBACK(GLOBAL_PROC, PROC_REF(ending_helper)), 270)
+			addtimer(CALLBACK(GLOBAL_PROC, GLOBAL_PROC_REF(cult_ending_helper), 1), 120)
+			addtimer(CALLBACK(GLOBAL_PROC, GLOBAL_PROC_REF(ending_helper)), 270)
 	if(client)
 		makeNewConstruct(/mob/living/simple_animal/hostile/construct/harvester, src, cultoverride = TRUE)
 	else
@@ -428,7 +429,7 @@
 	if(stat != DEAD && !is_servant_of_ratvar(src))
 		to_chat(src, span_userdanger("A blinding light boils you alive! <i>Run!</i>"))
 		adjust_fire_stacks(20)
-		IgniteMob()
+		ignite_mob()
 		return FALSE
 
 

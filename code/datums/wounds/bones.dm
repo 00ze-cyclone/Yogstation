@@ -47,7 +47,7 @@
 	RegisterSignal(victim, COMSIG_HUMAN_EARLY_UNARMED_ATTACK, PROC_REF(attack_with_hurt_hand))
 	if(limb.held_index && victim.get_item_for_held_index(limb.held_index) && (disabling || prob(30 * severity)))
 		var/obj/item/I = victim.get_item_for_held_index(limb.held_index)
-		if(istype(I, /obj/item/twohanded/offhand))
+		if(istype(I, /obj/item/offhand))
 			I = victim.get_inactive_held_item()
 
 		if(I && victim.dropItemToGround(I))
@@ -187,8 +187,6 @@
 	else if(limb.body_zone in list(BODY_ZONE_L_ARM, BODY_ZONE_R_ARM))
 		if(limb.current_gauze)
 			interaction_efficiency_penalty = 1 + ((interaction_efficiency_penalty - 1) * limb.current_gauze.splint_factor)
-		else
-			interaction_efficiency_penalty = interaction_efficiency_penalty
 
 	if(initial(disabling))
 		set_disabling(!limb.current_gauze)
@@ -374,7 +372,7 @@
 		to_chat(victim, span_userdanger("[user] finishes applying [I] to your [limb.name], and you can feel the bones exploding with pain as they begin melting and reforming!"))
 	else
 		var/painkiller_bonus = 0
-		if(victim.drunkenness > 10)
+		if(victim.get_drunk_amount() > 10)
 			painkiller_bonus += 10
 		if(victim.reagents?.has_reagent(/datum/reagent/medicine/morphine))
 			painkiller_bonus += 20

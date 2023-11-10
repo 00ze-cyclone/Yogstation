@@ -9,12 +9,14 @@
 	ignores_fakedeath = TRUE
 	req_stat = DEAD
 
-/datum/action/changeling/headcrab/sting_action(mob/user)
+/datum/action/changeling/headcrab/sting_action(mob/living/user)
 	set waitfor = FALSE
+	if(tgui_alert(user,"Are we sure we wish to kill ourself and create a headslug?",,list("Yes", "No")) != "Yes")
+		return
+	if(QDELETED(user)) // Yogs: Implies maybe that the user was already gibbed or something. Prevents a null mob loc later on
+		return
 	if(ismob(user.pulledby) && is_changeling(user.pulledby) && user.pulledby.grab_state >= GRAB_NECK)
 		to_chat(user, span_warning("Our abilities are being dampened! We cannot use [src]!"))
-		return
-	if(tgui_alert(usr,"Are we sure we wish to kill ourself and create a headslug?",,list("Yes", "No")) != "Yes")
 		return
 	..()
 	var/datum/mind/M = user.mind
@@ -31,7 +33,7 @@
 			H.Stun(20)
 			H.blur_eyes(20)
 			eyes.applyOrganDamage(5)
-			H.confused += 3
+			H.adjust_confusion(3 SECONDS)
 	for(var/mob/living/silicon/S in range(2,user))
 		to_chat(S, span_userdanger("Your sensors are disabled by a shower of blood!"))
 		S.Paralyze(60)

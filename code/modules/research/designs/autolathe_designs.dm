@@ -3,7 +3,7 @@
 ///////////////////////////////////
 
 /datum/design/airlock_scanner
-	name = "Airlock scanner"
+	name = "Airlock Scanner"
 	id = "airlock_scanner"
 	build_type = AUTOLATHE | PROTOLATHE
 	materials = list(/datum/material/iron = 50, /datum/material/glass = 50)
@@ -27,6 +27,15 @@
 	materials = list(/datum/material/iron = 1000)
 	build_path = /obj/item/mop
 	category = list("initial","Tools","Service")
+	departmental_flags = DEPARTMENTAL_FLAG_SERVICE
+
+/datum/design/broom
+	name="Broom"
+	id="broom"
+	build_type = AUTOLATHE | PROTOLATHE
+	materials = list(/datum/material/iron = 2000)
+	build_path = /obj/item/broom
+	category = list("initial","Tools","Tool Designs")
 	departmental_flags = DEPARTMENTAL_FLAG_SERVICE
 
 /datum/design/crowbar
@@ -274,6 +283,24 @@
 	category = list("initial","Tools","Tool Designs")
 	departmental_flags = DEPARTMENTAL_FLAG_ENGINEERING
 
+/datum/design/decal_painter
+	name = "Decal Painter"
+	id = "decal_painter"
+	build_type = AUTOLATHE | PROTOLATHE
+	materials = list(/datum/material/iron = 50, /datum/material/glass = 50)
+	build_path = /obj/item/airlock_painter/decal
+	category = list("initial","Tools","Tool Designs")
+	departmental_flags = DEPARTMENTAL_FLAG_ENGINEERING
+
+/datum/design/tile_painter
+	name = "Tile Painter"
+	id = "tile_painter"
+	build_type = AUTOLATHE | PROTOLATHE
+	materials = list(/datum/material/iron = 50, /datum/material/glass = 50)
+	build_path = /obj/item/airlock_painter/decal/tile
+	category = list("initial","Tools","Tool Designs")
+	departmental_flags = DEPARTMENTAL_FLAG_ENGINEERING
+
 /datum/design/emergency_oxygen
 	name = "Emergency Oxygen Tank"
 	id = "emergency_oxygen"
@@ -297,15 +324,6 @@
 	build_type = AUTOLATHE | PROTOLATHE
 	materials = list(/datum/material/iron = 800)
 	build_path = /obj/item/tank/internals/plasmaman/belt/empty
-	category = list("hacked","Miscellaneous","Equipment")
-	departmental_flags = DEPARTMENTAL_FLAG_ENGINEERING | DEPARTMENTAL_FLAG_CARGO
-
-/datum/design/ipc_coolant_tank
-	name = "IPC Coolant Tank"
-	id = "ipc_coolant_tank"
-	build_type = AUTOLATHE | PROTOLATHE
-	materials = list(/datum/material/iron = 800)
-	build_path = /obj/item/tank/internals/ipc_coolant/empty
 	category = list("hacked","Miscellaneous","Equipment")
 	departmental_flags = DEPARTMENTAL_FLAG_ENGINEERING | DEPARTMENTAL_FLAG_CARGO
 
@@ -487,6 +505,15 @@
 	category = list("initial","Miscellaneous", "Tool Designs")
 	departmental_flags = DEPARTMENTAL_FLAG_SERVICE
 
+/datum/design/rls
+	name = "Remote Light Switch (RLS)"
+	id = "rls"
+	build_type = AUTOLATHE | PROTOLATHE
+	materials = list(/datum/material/iron = 15000, /datum/material/glass = 7500)
+	build_path = /obj/item/rls
+	category = list("initial","Miscellaneous", "Tool Designs")
+	departmental_flags = DEPARTMENTAL_FLAG_SERVICE
+
 /datum/design/foilhat
 	name = "Tinfoil Hat"
 	id = "tinfoil_hat"
@@ -585,15 +612,6 @@
 	category = list("initial", "Medical", "Medical Designs")
 	departmental_flags = DEPARTMENTAL_FLAG_MEDICAL | DEPARTMENTAL_FLAG_SERVICE
 
-/datum/design/large_vial
-	name = "Large Vial"
-	id = "large_vial"
-	build_type = AUTOLATHE | PROTOLATHE
-	materials = list(/datum/material/glass = 1250)
-	build_path = /obj/item/reagent_containers/glass/bottle/vial/large
-	category = list("initial", "Medical", "Medical Designs")
-	departmental_flags = DEPARTMENTAL_FLAG_MEDICAL | DEPARTMENTAL_FLAG_SERVICE
-
 /datum/design/healthanalyzer
 	name = "Health Analyzer"
 	id = "healthanalyzer"
@@ -658,6 +676,15 @@
 	build_type = AUTOLATHE | PROTOLATHE
 	materials = list(/datum/material/iron = 400, /datum/material/glass = 120)
 	build_path = /obj/item/assembly/signaler
+	category = list("initial", "T-Comm", "Assemblies")
+	departmental_flags = DEPARTMENTAL_FLAG_ENGINEERING | DEPARTMENTAL_FLAG_SCIENCE
+
+/datum/design/signalbutton
+	name = "Remote Signaling Button"
+	id = "signalbutton"
+	build_type = AUTOLATHE | PROTOLATHE
+	materials = list(/datum/material/iron = 400, /datum/material/glass = 120)
+	build_path = /obj/item/assembly/signaler/button
 	category = list("initial", "T-Comm", "Assemblies")
 	departmental_flags = DEPARTMENTAL_FLAG_ENGINEERING | DEPARTMENTAL_FLAG_SCIENCE
 
@@ -872,6 +899,14 @@
 	build_path = /obj/item/ammo_casing/shotgun/buckshot
 	category = list("hacked", "Security")
 
+/datum/design/shotgun_dart
+	name = "Shotgun Dart"
+	id = "shotgun_dart"
+	build_type = AUTOLATHE
+	materials = list(/datum/material/iron = 4000)
+	build_path = /obj/item/ammo_casing/shotgun/dart
+	category = list("hacked", "Security")
+
 /datum/design/incendiary_slug
 	name = "Incendiary Slug"
 	id = "incendiary_slug"
@@ -937,6 +972,15 @@
 	id = "c10mm_disk"
 	category = list("Security")
 
+/datum/design/c10mm/cs
+	name = "Ammo Box (10mm caseless)"
+	id = "c10mm_cs"
+	build_path = /obj/item/ammo_box/c10mm/cs
+
+/datum/design/c10mm/cs/disk
+	id = "c10mm_cs_disk"
+	category = list("Security")
+
 /datum/design/c10mm/sp
 	name = "Ammo Box (10mm soporific)"
 	id = "c10mm_sp"
@@ -950,10 +994,10 @@
 	name = "Illegal Ammo Design Disk"
 	desc = "A disk containing designs for both standard and non-standard 10mm and .357 bullet designs."
 	icon_state = "datadisk1"
-	var/list/ammo_types = list(/datum/design/c10mm/disk, /datum/design/c10mm/sp/disk, /datum/design/c10mm/ap, /datum/design/c10mm/hp, /datum/design/c10mm/inc, /datum/design/c10mm/emp, 
+	var/list/ammo_types = list(/datum/design/c10mm/disk, /datum/design/c10mm/cs/disk, /datum/design/c10mm/sp/disk, /datum/design/c10mm/ap, /datum/design/c10mm/hp, /datum/design/c10mm/inc, /datum/design/c10mm/emp,
 								/datum/design/box_a357/disk, /datum/design/box_a357/ironfeather/disk, /datum/design/box_a357/nutcracker, /datum/design/box_a357/metalshock, /datum/design/box_a357/heartpiercer, /datum/design/box_a357/wallstake)
 
-/obj/item/disk/design_disk/illegal_ammo/Initialize()
+/obj/item/disk/design_disk/illegal_ammo/Initialize(mapload)
 	. = ..()
 	max_blueprints = ammo_types.len
 	for(var/design in ammo_types)
@@ -1255,12 +1299,3 @@
 	materials = list(/datum/material/iron = 15000)
 	build_path = /obj/item/ammo_box/no_direct/n762
 	category = list("hacked", "Security")
-
-/datum/design/decal_painter
-	name = "Decal Painter"
-	id = "decal_painter"
-	build_type = AUTOLATHE | PROTOLATHE
-	materials = list(/datum/material/iron = 50, /datum/material/glass = 50)
-	build_path = /obj/item/airlock_painter/decal
-	category = list("initial","Tools","Tool Designs")
-	departmental_flags = DEPARTMENTAL_FLAG_ENGINEERING

@@ -4,6 +4,7 @@
 	icon = 'icons/obj/abductor.dmi'
 	icon_state = "gland"
 	status = ORGAN_ROBOTIC
+	compatible_biotypes = ALL_BIOTYPES
 	beating = TRUE
 	var/true_name = "baseline placebo referencer"
 	var/cooldown_low = 30 SECONDS
@@ -17,7 +18,7 @@
 	var/mind_control_duration = 180 SECONDS
 	var/active_mind_control = FALSE
 
-/obj/item/organ/heart/gland/Initialize()
+/obj/item/organ/heart/gland/Initialize(mapload)
 	. = ..()
 	icon_state = pick(list("health", "spider", "slime", "emp", "species", "egg", "vent", "mindshock", "viral"))
 
@@ -50,8 +51,9 @@
 	else
 		holder.icon_state = "hudgland_spent"
 
-/obj/item/organ/heart/gland/update_icon()
-	return // stop it from switching to the non existent heart_on sprite
+/obj/item/organ/heart/gland/Initialize(mapload)
+	AddElement(/datum/element/update_icon_blocker)
+	return ..()
 	
 /obj/item/organ/heart/gland/proc/mind_control(command, mob/living/user)
 	if(!ownerCheck() || !mind_control_uses || active_mind_control)
@@ -80,7 +82,7 @@
 	if(initial(uses) == 1)
 		uses = initial(uses)
 	var/datum/atom_hud/abductor/hud = GLOB.huds[DATA_HUD_ABDUCTOR]
-	hud.remove_from_hud(owner)
+	hud.remove_atom_from_hud(owner)
 	clear_mind_control()
 	..()
 
@@ -89,7 +91,7 @@
 	if(special != 2 && uses) // Special 2 means abductor surgery
 		Start()
 	var/datum/atom_hud/abductor/hud = GLOB.huds[DATA_HUD_ABDUCTOR]
-	hud.add_to_hud(owner)
+	hud.add_atom_to_hud(owner)
 	update_gland_hud()
 
 /obj/item/organ/heart/gland/on_life()
@@ -170,13 +172,13 @@
 		switch(pick(1,3))
 			if(1)
 				to_chat(H, span_userdanger("You hear a loud buzz in your head, silencing your thoughts!"))
-				H.Stun(50)
+				H.Stun(5 SECONDS)
 			if(2)
 				to_chat(H, span_warning("You hear an annoying buzz in your head."))
-				H.confused += 15
+				H.adjust_confusion(15 SECONDS)
 				H.adjustOrganLoss(ORGAN_SLOT_BRAIN, 10, 160)
 			if(3)
-				H.hallucination += 60
+				H.adjust_hallucinations(1 MINUTES)
 
 /obj/item/organ/heart/gland/mindshock/mind_control(command, mob/living/user)
 	if(!ownerCheck() || !mind_control_uses || active_mind_control)
@@ -249,6 +251,7 @@
 	randomize_human(owner)
 	var/species = pick(list(/datum/species/human, /datum/species/lizard, /datum/species/gorilla, /datum/species/moth, /datum/species/fly)) // yogs -- gorilla people
 	owner.set_species(species)
+	owner.dna.update_dna_identity()
 
 /obj/item/organ/heart/gland/ventcrawling
 	true_name = "pliant cartilage enabler"
@@ -454,7 +457,7 @@
 	mind_control_duration = 1200
 	var/list/possible_reagents = list()
 
-/obj/item/organ/heart/gland/chem/Initialize()
+/obj/item/organ/heart/gland/chem/Initialize(mapload)
 	. = ..()
 	for(var/R in subtypesof(/datum/reagent/drug) + subtypesof(/datum/reagent/medicine) + typesof(/datum/reagent/toxin))
 		possible_reagents += R
@@ -475,7 +478,7 @@
 
 /obj/item/organ/heart/gland/gas/activate() //Yogstation change: plasma -> gas
 	to_chat(owner, span_warning("You feel bloated."))
-	addtimer(CALLBACK(GLOBAL_PROC, PROC_REF(to_chat), owner, span_userdanger("A massive stomachache overcomes you.")), 15 SECONDS)
+	addtimer(CALLBACK(GLOBAL_PROC, GLOBAL_PROC_REF(to_chat), owner, span_userdanger("A massive stomachache overcomes you.")), 15 SECONDS)
 	addtimer(CALLBACK(src, PROC_REF(vomit_gas)), 20 SECONDS) //Yogstation change: plasma -> gas
 
 /obj/item/organ/heart/gland/gas/proc/vomit_gas() //Yogstation change: plasma -> gas

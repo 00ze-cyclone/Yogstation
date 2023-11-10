@@ -19,10 +19,9 @@
 	var/wagging = FALSE
 	if(src.dna.species.is_wagging_tail())
 		wagging = TRUE
-	loc.handle_slip(src, knockdown_amount, O, lube, stun, force_drop)
+	. = loc.handle_slip(src, knockdown_amount, O, lube, stun, force_drop)
 	if(wagging)
 		src.dna.species.start_wagging_tail(src)
-	return
 	
 /mob/living/carbon/Process_Spacemove(movement_dir = 0)
 	if(!.)
@@ -30,7 +29,7 @@
 	if(!isturf(loc))
 		return FALSE
 	// Do we have a jetpack implant (and is it on)?
-	var/obj/item/organ/cyberimp/chest/thrusters/T = getorganslot(ORGAN_SLOT_THRUSTERS)
+	var/obj/item/organ/cyberimp/chest/thrusters/T = getorganslot(ORGAN_SLOT_TORSO_IMPLANT)
 	if(istype(T))
 		if(movement_dir && T.allow_thrust(0.01))
 			. = TRUE

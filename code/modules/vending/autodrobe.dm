@@ -200,6 +200,8 @@
 					/obj/item/clothing/shoes/clown_shoes/beeshoes = 1,
 					/obj/item/clothing/suit/santa = 1,
 					/obj/item/clothing/head/santa = 1,
+					/obj/item/clothing/suit/pocketcat = 1,
+					/obj/item/clothing/mask/pocketcatmask = 1,
 					/obj/item/clothing/neck/skillcape/admin = 1,
 					/obj/item/clothing/neck/skillcape/trimmed/admin = 1,
 					/obj/item/clothing/neck/skillcape/mentor = 1,
@@ -209,7 +211,8 @@
 					  /obj/item/gun/magic/wand = 2,
 					  /obj/item/clothing/glasses/sunglasses/garb = 2,
 					  /obj/item/clothing/glasses/blindfold = 1,
-					  /obj/item/clothing/mask/muzzle = 2)
+					  /obj/item/clothing/mask/muzzle = 2,
+					  /obj/item/clothing/suit/hooded/cultrobes/eldritch_toy = 1)
 	premium = list(/obj/item/clothing/suit/pirate/captain = 2,
 				   /obj/item/clothing/head/pirate/captain = 2,
 				   /obj/item/clothing/under/rank/rainbowclown = 1,

@@ -1,10 +1,8 @@
 /datum/job/roboticist
 	title = "Roboticist"
 	description = "Build and repair the AI and cyborgs, create mechs."
-	flag = ROBOTICIST
 	orbit_icon = "battery-half"
 	department_head = list("Research Director")
-	department_flag = MEDSCI
 	faction = "Station"
 	total_positions = 2
 	spawn_positions = 2
@@ -16,7 +14,7 @@
 
 	outfit = /datum/outfit/job/roboticist
 
-	added_access = list(ACCESS_TOX, ACCESS_TOX_STORAGE, ACCESS_XENOBIOLOGY, ACCESS_GENETICS)
+	added_access = list(ACCESS_TOX, ACCESS_TOX_STORAGE, ACCESS_XENOBIOLOGY, ACCESS_GENETICS, ACCESS_RND)
 	base_access = list(ACCESS_ROBO_CONTROL, ACCESS_TECH_STORAGE, ACCESS_MORGUE, ACCESS_RESEARCH, ACCESS_MECH_SCIENCE, ACCESS_MECH_ENGINE, ACCESS_MECH_MEDICAL, ACCESS_MECH_MINING, ACCESS_MINERAL_STOREROOM)
 	paycheck = PAYCHECK_MEDIUM
 	paycheck_department = ACCOUNT_SCI
@@ -31,13 +29,19 @@
 	mail_goodies = list(
 		/obj/item/storage/box/flashes = 20,
 		/obj/item/stack/sheet/metal/fifty = 15,
-		/obj/item/ipcrevive = 10,
 		/obj/item/stack/sheet/plasteel/twenty = 5,
 		/obj/item/modular_computer/tablet/preset/advanced = 5,
 		/obj/item/stock_parts/cell/bluespace = 5,
 		/obj/item/stack/ore/dilithium_crystal/refined = 5
 	)
 
+	lightup_areas = list(/area/science/mixing, /area/science/storage)
+	minimal_lightup_areas = list(
+		/area/medical/morgue,
+		/area/science/robotics,
+		/area/storage/tech
+	)
+	
 	smells_like = "burnt solder"
 
 /datum/outfit/job/roboticist
@@ -55,4 +59,4 @@
 	backpack = /obj/item/storage/backpack/science
 	satchel = /obj/item/storage/backpack/satchel/tox
 
-	pda_slot = SLOT_L_STORE
+	pda_slot = ITEM_SLOT_LPOCKET

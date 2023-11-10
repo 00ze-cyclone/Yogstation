@@ -1,10 +1,8 @@
 /datum/job/brigphysician
 	title = "Brig Physician"
 	description = "Watch over the Brig and Prison Wing to ensure prisoners receive medical attention when needed."
-	flag = BRIGPHYS
 	orbit_icon = "suitcase-medical"
 	department_head = list("Chief Medical Officer")
-	department_flag = MEDSCI
 	faction = "Station"
 	total_positions = 1
 	spawn_positions = 1
@@ -33,6 +31,8 @@
 
 	smells_like = "crimson guardianship"
 
+	minimal_lightup_areas = list(/area/medical/morgue)
+	
 	mail_goodies = list(
 		/obj/item/storage/firstaid/regular = 20,
 		/obj/item/reagent_containers/autoinjector/medipen/atropine = 10,
@@ -50,6 +50,7 @@
 	pda_type = /obj/item/modular_computer/tablet/pda/preset/paramed
 
 	backpack_contents = list(/obj/item/roller = 1)
+	belt = /obj/item/storage/belt/medical
 	ears = /obj/item/radio/headset/headset_medsec
 	glasses = /obj/item/clothing/glasses/hud/health/sunglasses
 	shoes = /obj/item/clothing/shoes/jackboots

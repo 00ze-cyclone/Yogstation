@@ -3,11 +3,9 @@
 	description = "Be responsible for the station, manage your Heads of Staff, \
 		keep the crew alive, be prepared to do anything and everything or die \
 		horribly trying."
-	flag = CAPTAIN
 	orbit_icon = "crown"
 	auto_deadmin_role_flags = DEADMIN_POSITION_HEAD|DEADMIN_POSITION_SECURITY|DEADMIN_POSITION_CRITICAL
 	department_head = list("CentCom")
-	department_flag = ENGSEC
 	faction = "Station"
 	total_positions = 1
 	spawn_positions = 1
@@ -16,7 +14,7 @@
 	req_admin_notify = 1
 	space_law_notify = 1 //Yogs
 	minimal_player_age = 14
-	exp_requirements = 300
+	exp_requirements = 900 //15 hours
 	exp_type = EXP_TYPE_CREW
 	exp_type_department = EXP_TYPE_COMMAND
 	alt_titles = list("Station Commander", "Facility Director", "Chief Executive Officer")
@@ -43,6 +41,12 @@
 		/obj/item/skub = 1,
 		/obj/item/greentext = 1
 	)
+	
+	minimal_lightup_areas = list(
+		/area/crew_quarters/heads/captain,
+		/area/crew_quarters/heads/hop,
+		/area/security
+	)
 
 	display_order = JOB_DISPLAY_ORDER_CAPTAIN
 	minimal_character_age = 35 //Feasibly expected to know everything and potentially do anything. Leagues of experience, briefing, training, and trust required for this role
@@ -54,7 +58,7 @@
 
 /datum/job/captain/announce(mob/living/carbon/human/H)
 	..()
-	SSticker.OnRoundstart(CALLBACK(GLOBAL_PROC, PROC_REF(minor_announce), "Captain [H.real_name] on deck!"))
+	SSticker.OnRoundstart(CALLBACK(GLOBAL_PROC, GLOBAL_PROC_REF(minor_announce), "Captain [H.real_name] on deck!"))
 
 /datum/outfit/job/captain
 	name = "Captain"

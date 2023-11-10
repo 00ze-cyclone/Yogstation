@@ -11,7 +11,7 @@
 		/obj/docking_port,
 		/obj/structure/lattice,
 		/obj/structure/stone_tile,
-		/obj/item/projectile,
+		/obj/projectile,
 		/obj/effect/projectile,
 		/obj/effect/portal,
 		/obj/effect/abstract,
@@ -81,7 +81,7 @@
 			return FALSE
 		if(ishuman(AM))
 			var/mob/living/carbon/human/H = AM
-			for(var/obj/item/wormhole_jaunter/J in H.GetAllContents())
+			for(var/obj/item/wormhole_jaunter/J in H.get_all_contents())
 				//To freak out any bystanders
 				H.visible_message(span_boldwarning("[H] falls into [parent]!"))
 				J.chasm_react(H)
@@ -207,20 +207,20 @@
 	mouse_opacity = MOUSE_OPACITY_TRANSPARENT
 
 /datum/component/chasm/proc/fish(datum/source, obj/item/I, mob/user, params)
-	if(!istype(I,/obj/item/twohanded/fishingrod))
+	if(!istype(I,/obj/item/fishingrod))
 		return
-	var/obj/item/twohanded/fishingrod/rod = I
-	if(!rod.wielded)
+	var/obj/item/fishingrod/rod = I
+	if(!HAS_TRAIT(rod, TRAIT_WIELDED))
 		to_chat(user, span_warning("You need to wield the rod in both hands before you can fish in the chasm!"))
 		return
-	if(do_after(user, 3 SECONDS, src.parent))
-		if(!rod.wielded)
+	if(do_after(user, 3 SECONDS, parent))
+		if(!HAS_TRAIT(rod, TRAIT_WIELDED))
 			return
 
 		var/list/fishing_contents = list()
 		for(var/turf/T in range(3, src.parent))
 			if(ischasm(T))
-				fishing_contents += T.GetAllContents()
+				fishing_contents += T.get_all_contents()
 
 		if(!length(fishing_contents))
 			to_chat(user, span_warning("There's nothing here!"))

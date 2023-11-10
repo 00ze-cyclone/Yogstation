@@ -133,6 +133,7 @@
 	set_limb(L)
 	LAZYADD(victim.all_wounds, src)
 	LAZYADD(limb.wounds, src)
+	update_descriptions()
 	limb.update_wounds()
 	if(status_effect_type)
 		linked_status_effect = victim.apply_status_effect(status_effect_type, src)
@@ -162,6 +163,10 @@
 	if(!demoted)
 		wound_injury(old_wound, attack_direction = attack_direction)
 		second_wind()
+
+// Updates descriptive texts for the wound, in case it can get altered for whatever reason
+/datum/wound/proc/update_descriptions()
+	return
 
 /// Remove the wound from whatever it's afflicting, and cleans up whateverstatus effects it had or modifiers it had on interaction times. ignore_limb is used for detachments where we only want to forget the victim
 /datum/wound/proc/remove_wound(ignore_limb, replaced = FALSE)
@@ -282,7 +287,7 @@
 		return FALSE
 
 	// now that we've determined we have a valid attempt at treating, we can stomp on their dreams if we're already interacting with the patient
-	if(INTERACTING_WITH(user, victim))
+	if(DOING_INTERACTION_WITH_TARGET(user, victim))
 		to_chat(user, span_warning("You're already interacting with [victim]!"))
 		return TRUE
 
@@ -319,6 +324,8 @@
 
 /// Called from cryoxadone and pyroxadone when they're proc'ing. Wounds will slowly be fixed separately from other methods when these are in effect. crappy name but eh
 /datum/wound/proc/on_xadone(power)
+	if(!(wound_flags & ACCEPTS_CRYO))
+		return
 	cryo_progress += power
 	if(cryo_progress > 66 * severity)
 		qdel(src)

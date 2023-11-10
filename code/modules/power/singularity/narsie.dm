@@ -28,7 +28,7 @@
 	grav_pull = 10
 	consume_range = 12 //How many tiles out do we eat
 
-/obj/singularity/narsie/large/Initialize()
+/obj/singularity/narsie/large/Initialize(mapload)
 	. = ..()
 	send_to_playing_players(span_narsie("NAR-SIE HAS RISEN"))
 	sound_to_playing_players('sound/creatures/narsie_rises.ogg')
@@ -45,7 +45,7 @@
 	var/souls = 0
 	var/resolved = FALSE
 
-/obj/singularity/narsie/large/cult/Initialize()
+/obj/singularity/narsie/large/cult/Initialize(mapload)
 	. = ..()
 	GLOB.cult_narsie = src
 	var/list/all_cults = list()
@@ -110,7 +110,7 @@
 	if(GLOB.cult_narsie.resolved == FALSE)
 		GLOB.cult_narsie.resolved = TRUE
 		sound_to_playing_players('sound/machines/alarm.ogg')
-		addtimer(CALLBACK(GLOBAL_PROC, PROC_REF(cult_ending_helper)), 12 SECONDS)
+		addtimer(CALLBACK(GLOBAL_PROC, GLOBAL_PROC_REF(cult_ending_helper)), 12 SECONDS)
 
 /obj/singularity/narsie/large/cult/Destroy()
 	send_to_playing_players("<span class='narsie'>\"<b>[pick("Nooooo...", "Not die. How-", "Die. Mort-", "Sas tyen re-")]\"</b></span>")
@@ -130,13 +130,13 @@
 /proc/ending_helper()
 	SSticker.force_ending = 1
 
-/proc/cult_ending_helper(var/ending_type = 0)
+/proc/cult_ending_helper(ending_type = 0)
 	if(ending_type == 2) //narsie fukkin died
-		Cinematic(CINEMATIC_CULT_FAIL,world,CALLBACK(GLOBAL_PROC,/proc/ending_helper))
+		Cinematic(CINEMATIC_CULT_FAIL,world,CALLBACK(GLOBAL_PROC,GLOBAL_PROC_REF(ending_helper)))
 	else if(ending_type) //no explosion
-		Cinematic(CINEMATIC_CULT,world,CALLBACK(GLOBAL_PROC,/proc/ending_helper))
+		Cinematic(CINEMATIC_CULT,world,CALLBACK(GLOBAL_PROC,GLOBAL_PROC_REF(ending_helper)))
 	else // explosion
-		Cinematic(CINEMATIC_CULT_NUKE,world,CALLBACK(GLOBAL_PROC,/proc/ending_helper))
+		Cinematic(CINEMATIC_CULT_NUKE,world,CALLBACK(GLOBAL_PROC,GLOBAL_PROC_REF(ending_helper)))
 
 
 

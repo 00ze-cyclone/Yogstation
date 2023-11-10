@@ -83,6 +83,8 @@
 	item_flags = SURGICAL_TOOL
 	tool_behaviour = TOOL_CAUTERY
 	w_class = WEIGHT_CLASS_TINY
+	force = 3
+	damtype = BURN
 	attack_verb = list("burnt")
 
 /obj/item/cautery/attack(mob/living/M, mob/user)
@@ -97,7 +99,6 @@
 	materials = list(/datum/material/iron=2500, /datum/material/glass=750)
 	w_class = WEIGHT_CLASS_TINY
 	toolspeed = 0.5
-	attack_verb = list("burnt")
 
 
 /obj/item/cautery/bone
@@ -175,7 +176,7 @@
 	wound_bonus = 2
 	bare_wound_bonus = 4
 
-/obj/item/scalpel/Initialize()
+/obj/item/scalpel/Initialize(mapload)
 	. = ..()
 	AddComponent(/datum/component/butchering, 80 * toolspeed, 100, 0)
 
@@ -234,7 +235,7 @@
 	wound_bonus = 5
 	bare_wound_bonus = 3
 
-/obj/item/circular_saw/Initialize()
+/obj/item/circular_saw/Initialize(mapload)
 	. = ..()
 	AddComponent(/datum/component/butchering, 40 * toolspeed, 100, 5, 'sound/weapons/circsawhit.ogg') //saws are very accurate and fast at butchering
 
@@ -459,11 +460,15 @@
 		playsound(get_turf(user),'sound/items/welderdeactivate.ogg',50,1)
 		to_chat(user, span_notice("You focus the lensess, it is now set to drilling mode."))
 		tool_behaviour = TOOL_DRILL
+		sharpness = SHARP_POINTY
+		force += 1
 		icon_state = "surgicaldrill_a"
 	else
 		playsound(get_turf(user),'sound/weapons/tap.ogg',50,1)
 		to_chat(user, span_notice("You dilate the lenses, setting it to mending mode."))
 		tool_behaviour = TOOL_CAUTERY
+		sharpness = SHARP_NONE
+		force -= 1
 		icon_state = "cautery_a"
 
 /obj/item/cautery/advanced/examine()
@@ -479,10 +484,10 @@
 	bolts = FALSE
 	var/obj/picked_up = /obj/item/surgical_mat
 
-/obj/structure/bed/surgical_mat/ComponentInitialize()
+/obj/structure/bed/surgical_mat/Initialize(mapload)
 	..()
 	var/datum/component/surgery_bed/SB = GetComponent(/datum/component/surgery_bed)
-	SB.success_chance = 0.8
+	SB.success_chance = 0.95
 
 /obj/structure/bed/surgical_mat/MouseDrop(over_object, src_location, over_location)
 	. = ..()
@@ -538,10 +543,10 @@
 	icon_state = "opmat_goli"
 	picked_up = /obj/item/surgical_mat/goliath
 
-/obj/structure/bed/surgical_mat/goliath/ComponentInitialize()
+/obj/structure/bed/surgical_mat/goliath/Initialize(mapload)
 	..()
 	var/datum/component/surgery_bed/SB = GetComponent(/datum/component/surgery_bed)
-	SB.success_chance = 0.85
+	SB.success_chance = 0.97
 
 /obj/item/surgical_mat/goliath
 	name = "goliath hide surgical mat"

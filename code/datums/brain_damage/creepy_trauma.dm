@@ -78,9 +78,8 @@
 	if(prob(25)) // 25% chances to be nervous and stutter.
 		if(prob(50)) // 12.5% chance (previous check taken into account) of doing something suspicious.
 			addtimer(CALLBACK(src, PROC_REF(on_failed_social_interaction)), rand(1, 3) SECONDS)
-		else if(!owner.stuttering)
+		if(owner.set_stutter_if_lower(3 SECONDS))
 			to_chat(owner, span_warning("Being near [obsession] makes you nervous and you begin to stutter..."))
-		owner.stuttering = max(3, owner.stuttering)
 
 /datum/brain_trauma/special/obsessed/on_hug(mob/living/hugger, mob/living/hugged)
 	if(hugged == obsession)
@@ -101,7 +100,7 @@
 			to_chat(owner, span_userdanger("You feel your heart lurching in your chest..."))
 		if(81 to 100)
 			INVOKE_ASYNC(owner, TYPE_PROC_REF(/mob, emote), "cough")
-			owner.dizziness += 10
+			owner.adjust_dizzy(20)
 			owner.adjust_disgust(5)
 			to_chat(owner, span_userdanger("You gag and swallow a bit of bile..."))
 
@@ -109,7 +108,7 @@
 
 	if(examining_mob != owner || !triggering_examiner || prob(50))
 		return
-	addtimer(CALLBACK(GLOBAL_PROC, PROC_REF(to_chat), obsession, span_warning("You catch [examining_mob] staring at you...")), 3)
+	addtimer(CALLBACK(GLOBAL_PROC, GLOBAL_PROC_REF(to_chat), obsession, span_warning("You catch [examining_mob] staring at you...")), 3)
 	return COMSIG_BLOCK_EYECONTACT
 
 /datum/brain_trauma/special/obsessed/proc/find_obsession()

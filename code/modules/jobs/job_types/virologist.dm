@@ -2,10 +2,8 @@
 	title = "Virologist"
 	description = "Study the effects of various diseases and synthesize a \
 		vaccine for them. Engineer beneficial viruses."
-	flag = VIROLOGIST
 	orbit_icon = "virus"
 	department_head = list("Chief Medical Officer")
-	department_flag = MEDSCI
 	faction = "Station"
 	total_positions = 1
 	spawn_positions = 1
@@ -45,6 +43,14 @@
 		/obj/item/reagent_containers/glass/bottle/anxiety = 3
 	)
 
+	lightup_areas = list(
+		/area/medical/morgue,
+		/area/medical/surgery,
+		/area/medical/genetics,
+		/area/medical/chemistry
+	)
+	minimal_lightup_areas = list(/area/medical/virology)
+	
 	smells_like = "germlessness"
 
 /datum/outfit/job/virologist

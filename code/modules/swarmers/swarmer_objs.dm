@@ -131,7 +131,7 @@
 	. = ..()
 	if(isswarmer(O))
 		return TRUE
-	if(istype(O, /obj/item/projectile/beam/disabler))
+	if(istype(O, /obj/projectile/beam/disabler))
 		return TRUE
 
 /obj/effect/temp_visual/swarmer //temporary swarmer visual feedback objects
@@ -142,7 +142,7 @@
 	icon_state = "disintegrate"
 	duration = 10
 
-/obj/effect/temp_visual/swarmer/disintegration/Initialize()
+/obj/effect/temp_visual/swarmer/disintegration/Initialize(mapload)
 	. = ..()
 	playsound(loc, "sparks", 100, TRUE)
 
