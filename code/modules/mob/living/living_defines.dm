@@ -77,8 +77,6 @@
 
 	var/health_doll_icon //if this exists AND the normal sprite is bigger than 32x32, this is the replacement icon state (because health doll size limitations). the icon will always be screen_gen.dmi
 
-	var/bubble_icon = "default" //what icon the mob uses for speechbubbles
-
 	var/last_bumped = 0
 	var/unique_name = 0 //if a mob's name should be appended with an id when created e.g. Mob (666)
 
@@ -142,3 +140,10 @@
 	var/body_position_pixel_x_offset = 0
 	///The y amount a mob's sprite should be offset due to the current position they're in or size (e.g. lying down moves your sprite down)
 	var/body_position_pixel_y_offset = 0
+
+	///How many hands does this mob have by default. This shouldn't change at runtime.
+	var/default_num_hands = 2
+	///How many hands hands does this mob currently have. Should only be changed through set_num_hands()
+	var/num_hands = 2
+	///How many usable hands does this mob currently have. Should only be changed through set_usable_hands()
+	var/usable_hands = 2
